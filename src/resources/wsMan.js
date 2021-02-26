@@ -57,7 +57,7 @@ const wsMan = {
                     onChat(data.from, data.message)
                     break;
                 case 'elevated':
-                    onElevated();
+                    onElevated(data.elevated);
                 default:
                     console.log(data);
                     break;

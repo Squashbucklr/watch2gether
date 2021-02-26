@@ -58,8 +58,8 @@ class App extends React.Component {
         wsMan.onUrl((video_url) => {
             this.setState({video_url});
         });
-        wsMan.onElevated(() => {
-            this.setState({elevated: true});
+        wsMan.onElevated((elevated) => {
+            this.setState({elevated});
         });
 
         wsMan.init(this.state.lobby_id);
