@@ -16,7 +16,7 @@ class UserList extends React.Component {
         let connectionkeys = Object.keys(this.props.connections);
         for (let i = 0; i < connectionkeys.length; i++) {
             list.push(
-                <div className="UserList-entry" onClick={() => {this.props.setHost(connectionkeys[i])}}>
+                <div key={'uli' + i} className="UserList-entry" onClick={() => {this.props.setHost(connectionkeys[i])}}>
                     {this.props.connections[connectionkeys[i]].username}
                     {this.props.connections[connectionkeys[i]].host ? ' (host)' : ''}
                 </div>

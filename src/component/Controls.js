@@ -52,7 +52,7 @@ class Controls extends React.Component {
                     <input onKeyDown={this.enterKey(this.setUsername)} ref={this.usernameInput}></input>
                     <button onClick={this.setUsername}>Set Username</button>
                 </div>
-                <div className="Controls-control">
+                <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                     <input onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
                     <button onClick={this.elevate}>Elevate</button>
                 </div>

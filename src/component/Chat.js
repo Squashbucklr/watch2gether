@@ -30,7 +30,7 @@ class Chat extends React.Component {
 
         for (let i = 0; i < this.props.chats.length; i++) {
             chats.push(
-                <div className="Chat-chat-outer">
+                <div key={'c' + i} className="Chat-chat-outer">
                     <div className="Chat-from">{this.props.chats[i].from}:</div>
                     <div className="Chat-chat">{this.props.chats[i].chat}</div>
                 </div>
