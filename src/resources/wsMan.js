@@ -29,8 +29,8 @@ const wsMan = {
         console.log('Initializing WebSocket connection...');
         ws = new WebSocket('wss://' + config.base + '/lobby?id=' + lobby_id);
         ws.onopen = () => {
-            pingLoop();
             onConnect();
+            pingLoop();
         };
         ws.onmessage = (msg) => {
             let data = JSON.parse(msg.data);
