@@ -26,14 +26,13 @@ const wsMan = {
         else onDisconnect();
     },
     init: (lobby_id) => {
-        console.log('init');
+        console.log('Initializing WebSocket connection...');
         ws = new WebSocket('wss://' + config.base + '/lobby?id=' + lobby_id);
         ws.onopen = () => {
             pingLoop();
             onConnect();
         };
         ws.onmessage = (msg) => {
-            console.log(msg.data);
             let data = JSON.parse(msg.data);
             switch(data.type) {
                 case 'pong':
