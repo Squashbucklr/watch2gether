@@ -37,8 +37,6 @@ class Chat extends React.Component {
             );
         }
 
-        console.log(chats);
-
         return (
             <div className="Chat">
                 <div className="Chat-box">

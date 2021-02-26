@@ -44,9 +44,7 @@ class App extends React.Component {
         });
         wsMan.onChat((from, chat) => {
             let chats = [...this.state.chats];
-            console.log(chats);
             chats.push({from, chat});
-            console.log(chats);
             this.setState({chats});
         });
         wsMan.onSeek((video_time) => {
