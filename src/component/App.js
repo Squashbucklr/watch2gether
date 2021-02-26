@@ -21,8 +21,13 @@ class App extends React.Component {
             lobby_id: qs.parse(window.location.search, { ignoreQueryPrefix: true }).id,
             chats: [],
             connections: {},
-            host: false
+            host: false,
+            elevated: false 
         }
+    }
+
+    componentWillUnmount = () => {
+        wsMan.disconnect();
     }
 
     init = () => {
@@ -53,6 +58,9 @@ class App extends React.Component {
         wsMan.onUrl((video_url) => {
             this.setState({video_url});
         });
+        wsMan.onElevated(() => {
+            this.setState({elevated: true});
+        });
 
         wsMan.init(this.state.lobby_id);
     }
@@ -61,8 +69,9 @@ class App extends React.Component {
         wsMan.play(!this.state.video_play, time);
     }
 
-    seek = (time) => {
-        wsMan.seek(time);
+    elevate = (code) => {
+        this.setState({elevated: false});
+        wsMan.elevate(code);
     }
 
     render() {
@@ -75,16 +84,17 @@ class App extends React.Component {
                             play={this.state.video_play}
                             time={this.state.video_time}
                             playPause={this.playPause}
-                            seek={this.seek}
+                            seek={wsMan.seek}
                         />
                     </div>
                     <div className="App-right">
                         <Controls
                             setUsername={wsMan.setUsername}
-                            elevate={wsMan.elevate}
+                            elevate={this.elevate}
                             setUrl={wsMan.setUrl}
                             video_url={this.state.video_url}
                             host={this.state.host}
+                            elevated={this.state.elevated}
                         />
                         <UserList
                             connections={this.state.connections}

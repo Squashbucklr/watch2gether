@@ -54,7 +54,7 @@ class Controls extends React.Component {
                 </div>
                 <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                     <input onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
-                    <button onClick={this.elevate}>Elevate</button>
+                    <button className={this.props.elevated ? "Controls-green" : ""} onClick={this.elevate}>Elevate</button>
                 </div>
                 <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                     <textarea

@@ -10,6 +10,7 @@ let onChat = () => {};
 let onSeek = () => {};
 let onPlay = () => {};
 let onUrl = () => {};
+let onElevated = () => {};
 
 const wsMan = {
     onConnect: (fun) => {onConnect = fun},
@@ -19,6 +20,12 @@ const wsMan = {
     onSeek: (fun) => {onSeek = fun},
     onPlay: (fun) => {onPlay = fun},
     onUrl: (fun) => {onUrl = fun},
+    onElevated: (fun) => {onElevated = fun},
+    disconnect: () => {
+        if(ws) ws.close();
+        ws = null;
+        onDisconnect();
+    },
     init: (lobby_id) => {
         console.log('init');
         ws = new WebSocket('wss://' + config.base + '/lobby?id=' + lobby_id);
@@ -49,6 +56,8 @@ const wsMan = {
                 case 'message':
                     onChat(data.from, data.message)
                     break;
+                case 'elevated':
+                    onElevated();
                 default:
                     console.log(data);
                     break;
