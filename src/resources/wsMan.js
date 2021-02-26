@@ -56,6 +56,7 @@ const wsMan = {
                     break;
                 case 'elevated':
                     onElevated(data.elevated);
+                    break;
                 default:
                     console.log(data);
                     break;
