@@ -19,8 +19,11 @@
 
         &.Video-hide {
             & .Video-overlay {
-                pointer-events: none;
                 opacity: 0;
+                
+                & .Video-play, & .Video-fullscreen, & .Video-audio, & .Video-scrubber {
+                    pointer-events: none;
+                }
             }
         }
 
@@ -33,6 +36,7 @@
         }
 
         & .Video-overlay {
+            pointer-events: none;
             user-select: none;
             opacity: 1;
             position: absolute;
@@ -41,6 +45,10 @@
             bottom: 0px;
             right: 0px;
             transition: opacity 0.25s;
+
+            & .Video-play, & .Video-fullscreen, & .Video-audio, & .Video-scrubber {
+                pointer-events: all;
+            }
 
             & .Video-play, & .Video-fullscreen, & .Video-audio {
                 position: absolute;

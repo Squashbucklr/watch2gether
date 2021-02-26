@@ -32,7 +32,7 @@ class Video extends React.Component {
             hover_fulscreen: false,
             video_currentTime: 0,
             video_fullscreen: false,
-            hideMouse: false,
+            hideMouse: true,
             peek: {
                 left: 0,
                 time: 0
@@ -162,6 +162,7 @@ class Video extends React.Component {
                 <figure
                     ref={this.videoWrapper}
                     onMouseMove={this.mouseHide(1500)}
+                    onMouseOut={this.mouseHide(0)}
                     style={{
                         cursor: this.state.hideMouse ? "none" : "default"
                     }}
@@ -175,8 +176,7 @@ class Video extends React.Component {
                         <source src={this.props.url}></source>
                     </video>
                     <div
-                        className="Video-overlay" 
-                        onMouseOut={this.mouseHide(0)}
+                        className="Video-overlay"
                     >
                         <div
                             className="Video-play"
