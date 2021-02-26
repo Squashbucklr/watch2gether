@@ -49,6 +49,9 @@ class Controls extends React.Component {
         return (
             <div className="Controls">
                 <div className="Controls-control">
+                    <div>lobby: {this.props.lobby_id}</div>
+                </div>
+                <div className="Controls-control">
                     <input onKeyDown={this.enterKey(this.setUsername)} ref={this.usernameInput}></input>
                     <button onClick={this.setUsername}>Set Username</button>
                 </div>

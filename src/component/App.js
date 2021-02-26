@@ -92,6 +92,7 @@ class App extends React.Component {
                             setUsername={wsMan.setUsername}
                             elevate={this.elevate}
                             setUrl={wsMan.setUrl}
+                            lobby_id={this.state.lobby_id}
                             video_url={this.state.video_url}
                             host={this.state.host}
                             elevated={this.state.elevated}
