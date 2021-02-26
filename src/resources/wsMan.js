@@ -23,8 +23,7 @@ const wsMan = {
     onElevated: (fun) => {onElevated = fun},
     disconnect: () => {
         if(ws) ws.close();
-        ws = null;
-        onDisconnect();
+        else onDisconnect();
     },
     init: (lobby_id) => {
         console.log('init');
@@ -63,47 +62,50 @@ const wsMan = {
                     break;
             }
         };
+        ws.onclose = () => {
+            ws = null;
+            onDisconnect();
+        }
     },
     seek: (time) => {
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'time',
             time
         }));
     },
     play: (play, time) => {
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'play',
             play,
             time
         }));
     },
     elevate: (code) => {
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'elevate',
             code
         }));
     },
     setUrl: (url) => {
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'url',
             url
         }));
     },
     setUsername: (name) => {
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'name',
             name
         }));
     },
     sendChat: (message) => {
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'message',
             message
         }));
     },
     setHost: (connectionid) => {
-        console.log(connectionid);
-        ws.send(JSON.stringify({
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'host',
             connectionid
         }));
