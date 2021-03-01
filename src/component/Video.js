@@ -46,6 +46,29 @@ class Video extends React.Component {
 
     componentDidMount = () => {
         this.fixVideoPosition();
+        document.onkeydown = (e) => {
+            console.log(e);
+            if (e.target.localName !== 'input') {
+                switch (e.code) {
+                    case 'Space':
+                    case 'KeyK':
+                        this.props.playPause(this.getCurrentTime());
+                        break;
+                    case 'ArrowRight':
+                    case 'KeyL':
+                        if (e.shiftKey) this.props.seek(this.getCurrentTime() + 85);
+                        else this.props.seek(this.getCurrentTime() + 5);
+                        break;
+                    case 'ArrowLeft':
+                    case 'KeyJ':
+                        if (e.shiftKey) this.props.seek(this.getCurrentTime() - 85);
+                        else this.props.seek(this.getCurrentTime() - 5);
+                        break;
+                    case 'KeyF':
+                        this.handleFullscreen();
+                }
+            }
+        }
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
