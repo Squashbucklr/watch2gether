@@ -48,7 +48,7 @@ class Video extends React.Component {
         this.fixVideoPosition();
         document.onkeydown = (e) => {
             console.log(e);
-            if (e.target.localName !== 'input') {
+            if (e.target.localName !== 'input' && e.target.localName !== 'textarea') {
                 switch (e.code) {
                     case 'Space':
                     case 'KeyK':
