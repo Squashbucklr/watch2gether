@@ -8,16 +8,19 @@ class Controls extends React.Component {
         this.usernameInput = React.createRef();
         this.elevateInput = React.createRef();
         this.urlInput = React.createRef();
+        this.needsUrlChange = false;
         this.state = {
             
         }
     }
 
+    shouldComponentUpdate = (nextProps, nextState) => {
+        this.needsUrlChange = this.props.video_url !== nextProps.video_url;
+        return true;
+    }
+
     componentDidUpdate = () => {
-        if (true) {
-            this.urlInput.current.value = this.props.video_url;
-        }
-        this.shouldSetUrl = false;
+        if (this.needsUrlChange) this.urlInput.current.value = this.props.video_url;
     }
 
     setUsername = () => {
