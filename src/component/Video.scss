@@ -19,7 +19,7 @@
 
         &.Video-hide {
             & .Video-overlay {
-                opacity: 1;
+                opacity: 0;
                 
                 & .Video-play, & .Video-fullscreen, & .Video-audio, & .Video-scrubber {
                     pointer-events: none;
