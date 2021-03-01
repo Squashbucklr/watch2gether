@@ -19,7 +19,7 @@
 
         &.Video-hide {
             & .Video-overlay {
-                opacity: 0;
+                opacity: 1;
                 
                 & .Video-play, & .Video-fullscreen, & .Video-audio, & .Video-scrubber {
                     pointer-events: none;
@@ -46,8 +46,12 @@
             right: 0px;
             transition: opacity 0.25s;
 
-            & .Video-play, & .Video-fullscreen, & .Video-audio, & .Video-scrubber {
+            & .Video-play, & .Video-fullscreen, & .Video-audio, & .Video-scrubber, & .Video-audio-scrubber {
                 pointer-events: all;
+
+                & .Video-hide-icon {
+                    pointer-events: none;
+                }
             }
 
             & .Video-play, & .Video-fullscreen, & .Video-audio {
@@ -64,6 +68,22 @@
                 font-size: 14px;
             }
 
+            & .Video-time-through, & .Video-time-total {
+                position: absolute;
+                color: #FFF;
+                font-size: 14px;
+                bottom: 12px;
+                text-shadow: 0px 0px 10px #000;
+            }
+
+            & .Video-time-through {
+                left: 30px;
+            }
+
+            & .Video-time-total {
+                right: 55px;
+            }
+
             & .Video-play {
                 left: 5px;
             }
@@ -72,16 +92,12 @@
                 right: 5px;
             }
 
-            & .Video-audio {
-                right: 30px;
-            }
-
             & .Video-scrubber {
                 position: absolute;
-                bottom: 5px;
+                bottom: 0px;
                 left: 30px;
                 right: 55px;
-                height: 24px;
+                height: 27px;
                 cursor: pointer;
 
                 transition: 0.05s;
@@ -94,8 +110,8 @@
 
                 & .Video-scrubber-bg {
                     position: absolute;
-                    top: 10px;
-                    bottom: 10px;
+                    height: 4px;
+                    bottom: 8px;
                     left: 0px;
                     right: 0px;
                     background-color: #FFF6;
@@ -105,8 +121,8 @@
 
                 & .Video-scrubber-bar {
                     position: absolute;
-                    top: 10px;
-                    bottom: 10px;
+                    height: 4px;
+                    bottom: 8px;
                     left: 0px;
                     background-color: #FFFC;
                     border-radius: 2px;
@@ -123,6 +139,51 @@
                     padding: 0px 5px;
                     border-radius: 5px;
                     box-shadow: 0px 0px 10px #000A;
+                }
+            }
+
+            & .Video-audio {
+                right: 30px;
+
+                &:hover {
+                    & .Video-audio-scrubber {
+                        pointer-events: all;
+                        opacity: 1;
+                    }
+                }
+
+                & .Video-audio-scrubber {
+                    pointer-events: none;
+                    opacity: 0;
+                    position: absolute;
+                    bottom: 20px;
+                    height: 80px;
+                    right: -5px;
+                    width: 30px;
+                    cursor: pointer;
+    
+                    transition: 0.05s;
+    
+                    & .Video-audio-scrubber-bg {
+                        position: absolute;
+                        height: 80px;
+                        bottom: 0px;
+                        left: 13px;
+                        width: 4px;
+                        background-color: #FFF6;
+                        box-shadow: 0px 0px 10px #000;
+                        border-radius: 2px;
+                    }
+    
+                    & .Video-audio-scrubber-bar {
+                        position: absolute;
+                        height: 40px;
+                        bottom: 0px;
+                        left: 13px;
+                        width: 4px;
+                        background-color: #FFFC;
+                        border-radius: 2px;
+                    }
                 }
             }
         }
