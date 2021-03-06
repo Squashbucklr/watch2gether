@@ -289,9 +289,7 @@ class Video extends React.Component {
                                 ref={this.videoAudioScrubber}
                                 className="Video-audio-scrubber"
                                 onMouseMove={this.scrubberAudioPeek}
-                                onMouseEnter={() => {this.handleVideoOverlayHover(6, true)}}
                                 onMouseLeave={() => {
-                                    this.handleVideoOverlayHover(6, false);
                                     this.doSeekAudio();
                                 }}
                                 onMouseDown={() => {
