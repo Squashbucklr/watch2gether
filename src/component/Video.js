@@ -13,7 +13,7 @@ import {
     faCompress
 } from '@fortawesome/free-solid-svg-icons'
 
-const OFFSET_TOLERANCE = 0.75;
+const OFFSET_TOLERANCE = 0.5;
 
 class Video extends React.Component {
     constructor(props) {
@@ -24,30 +24,28 @@ class Video extends React.Component {
         this.mouseTimeout = null;
         this.videoNode = React.createRef();
         this.videoWrapper = React.createRef();
-        this.videoScrubber = React.createRef();
+        this.videoScrubberBar = React.createRef();
         this.videoAudioScrubber = React.createRef();
+        this.octopusInstance = null;
         this.audio_memory = 0;
         this.state = {
             seeking: false,
-            seekingAudio: false,
-            videoOverlayHovers: [false, false, false, false, false, false, false],
-            video_currentTimeStamp: 0,
-            video_currentTimeFrac: 0,
+            seek_time: 0,
+            video_time: 0, // for progress timekeeping only. this.getCurrentTime() for precise getting.
             video_duration: 0,
+
+            videoOverlayHovers: [false, false, false, false, false, false, false],
             video_fullscreen: false,
-            video_audio_level: 1,
             hideMouse: true,
-            peek: {
-                left: 0,
-                time: 0
-            }
+
+            seekingAudio: false,
+            audio_level: 1,
         }
     }
 
     componentDidMount = () => {
-        this.fixVideoPosition();
+        // this.setVideoPosition();
         document.onkeydown = (e) => {
-            console.log(e);
             if (e.target.localName !== 'input' && e.target.localName !== 'textarea') {
                 switch (e.code) {
                     case 'Space':
@@ -66,22 +64,25 @@ class Video extends React.Component {
                         break;
                     case 'KeyF':
                         this.handleFullscreen();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
     }
 
-    shouldComponentUpdate = (nextProps, nextState) => {
-        this.needsTimeChange = Math.abs(this.props.time - nextProps.time) > 0.01;
-        this.needsAudioChange = Math.abs(this.state.video_audio_level - nextState.video_audio_level) > 0.001;
-        this.needsSourceLoad = this.props.url !== nextProps.url;
-        return true;
-    }
+    componentDidUpdate = (prevProps, prevState) => {
+        if (JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)) {
+            this.videoNode.current.load();
+        }
+        if (Math.abs(prevProps.time - this.props.time) > OFFSET_TOLERANCE || !this.props.play) {
+            setTimeout(() => {this.setVideoPosition()}, 0);
+        }
+        if (Math.abs(prevState.audio_level - this.state.audio_level) > 0.001) {
+            this.setAudioValue();
+        }
 
-    componentDidUpdate = () => {
-        if (this.needsSourceLoad) this.videoNode.current.load();
-        if (this.needsTimeChange) this.fixVideoPosition();
-        if (this.needsAudioChange) this.fixAudioValue();
         if (this.videoNode.current.paused && this.props.play) {
             this.videoNode.current.play();
         } else if (!this.videoNode.current.paused && !this.props.play) {
@@ -89,58 +90,37 @@ class Video extends React.Component {
         }
     }
 
-    fixVideoPosition = () => {
-        this.needsScrub = false;
-        if (!this.props.play || Math.abs(this.getCurrentTime() - this.props.time) > OFFSET_TOLERANCE) {
-            // important to note that this.props.time only changes when the websocket passes the video state.
-            // it does not live update.
-            this.videoNode.current.currentTime = this.props.time;
-            let frac = this.props.time / this.getDuration();
-            if (isNaN(frac)) frac = 0;
-            this.setState({
-                video_currentTimeStamp: this.getTime(this.props.time),
-                video_currentTimeFrac: frac
-            })
-        }
+    setVideoPosition = () => {
+        this.needsTimeChange = false;
+        // important to note that this.props.time only changes when the websocket passes the video state.
+        // it does not live update.
+
+        if (this.videoNode.current) this.videoNode.current.currentTime = this.props.time;
+        this.setState({video_time: this.props.time});
     }
 
-    fixAudioValue = () => {
-        this.videoNode.current.volume = this.state.video_audio_level;
+    setAudioValue = () => {
+        this.videoNode.current.volume = this.state.audio_level;
     }
 
-    scrubberPeek = (e) => {
-        let scrubBox = this.videoScrubber.current.getBoundingClientRect();
+    onSeek = (e) => {
+        let scrubBox = this.videoScrubberBar.current.getBoundingClientRect();
         let scrubThru = ((e.pageX - scrubBox.x) / scrubBox.width);
         if (scrubThru <= 0) scrubThru = 0;
         if (scrubThru >= 1) scrubThru = 1;
-        this.scrubFrac(scrubThru);
-        
+        this.setState({seek_time: scrubThru * this.state.video_duration});
     }
 
-    scrubberAudioPeek = (e) => {
-        let scrubBox = this.videoAudioScrubber.current.getBoundingClientRect();
-        let scrubThru = 1 - ((e.pageY - scrubBox.y) / (scrubBox.height - 5));
-        if (scrubThru <= 0) scrubThru = 0;
-        if (scrubThru >= 1) scrubThru = 1;
-        this.scrubAudioFrac(scrubThru);
-        
-    }
-
-    scrubFrac = (frac) => {
-        this.setState({
-            peek: {
-                left: (frac * 100) + '%',
-                time: frac * this.getDuration()
-            }
-        });
-    }
-
-    scrubAudioFrac = (frac) => {
-        this.setState({
-            peekAudio: {
-                value: frac
-            }
-        });
+    onAudioSeek = (e) => {
+        if (this.state.seekingAudio) {
+            let scrubBox = this.videoAudioScrubber.current.getBoundingClientRect();
+            let scrubThru = 1 - ((e.pageY - scrubBox.y) / (scrubBox.height - 5));
+            if (scrubThru <= 0) scrubThru = 0;
+            if (scrubThru >= 1) scrubThru = 1;
+            
+            // audio is instant
+            this.setState({audio_level: scrubThru});
+        }
     }
 
     mouseHide = (time) => {
@@ -175,17 +155,16 @@ class Video extends React.Component {
 
     doSeek = () => {
         if(this.state.seeking) {
-            this.props.seek(this.state.peek.time);
+            this.props.seek(this.state.seek_time);
         }
         this.setState({seeking: false});
     }
 
     doSeekAudio = () => {
         if(this.state.seekingAudio) {
-            if (this.state.peekAudio.value === 0) {
-                this.audio_memory = this.state.video_audio_level;
+            if (this.state.audio_level === 0) {
+                this.audio_memory = 0.01;
             }
-            this.setState({video_audio_level: this.state.peekAudio.value})
         }
         this.setState({seekingAudio: false});
     }
@@ -231,12 +210,12 @@ class Video extends React.Component {
     }
 
     handleMute = (e) => {
-        if (e.target == e.currentTarget) {
-            if (this.state.video_audio_level > 0) {
-                this.audio_memory = this.state.video_audio_level;
-                this.setState({video_audio_level: 0});
+        if (e.target === e.currentTarget) {
+            if (this.state.audio_level > 0) {
+                this.audio_memory = this.state.audio_level;
+                this.setState({audio_level: 0});
             } else {
-                this.setState({video_audio_level: this.audio_memory});
+                this.setState({audio_level: this.audio_memory});
             }
         }
     }
@@ -258,14 +237,11 @@ class Video extends React.Component {
                         ref={this.videoNode}
                         className="Video-video"
                         onTimeUpdate={() => {
-                            this.setState({
-                                video_currentTimeStamp: this.getTime(this.getCurrentTime()),
-                                video_currentTimeFrac: this.getCurrentTime() / this.getDuration()
-                            })
+                            this.setState({video_time: this.getCurrentTime()})
                         }}
                         onDurationChange={() => {this.setState({video_duration: this.getDuration()})}}
                     >
-                        <source src={this.props.url}></source>
+                        <source src={this.props.data.url}></source>
                     </video>
                     <div
                         className="Video-overlay"
@@ -288,12 +264,13 @@ class Video extends React.Component {
                             <div
                                 ref={this.videoAudioScrubber}
                                 className="Video-audio-scrubber"
-                                onMouseMove={this.scrubberAudioPeek}
+                                onMouseMove={this.onAudioSeek}
                                 onMouseLeave={() => {
                                     this.doSeekAudio();
                                 }}
                                 onMouseDown={() => {
                                     this.setState({seekingAudio: true});
+                                    this.onAudioSeek();
                                 }}
                                 onMouseUp={() => {
                                     this.doSeekAudio();
@@ -303,7 +280,7 @@ class Video extends React.Component {
                                 <div
                                     className="Video-audio-scrubber-bar"
                                     style={{
-                                        height: (this.state.video_audio_level * 100) + '%'
+                                        height: (this.state.audio_level * 100) + '%'
                                     }}
                                 ></div>
                             </div>
@@ -318,16 +295,15 @@ class Video extends React.Component {
                             className="Video-time-through"
                             onMouseOver={() => {this.handleVideoOverlayHover(4, true)}}
                             onMouseOut={() => {this.handleVideoOverlayHover(4, false)}}
-                        >{this.state.video_currentTimeStamp}</div>
+                        >{this.getTime(this.state.video_time)}</div>
                         <div
                             className="Video-time-total"
                             onMouseOver={() => {this.handleVideoOverlayHover(5, true)}}
                             onMouseOut={() => {this.handleVideoOverlayHover(5, false)}}
                         >{this.getTime(this.state.video_duration)}</div>
                         <div
-                            ref={this.videoScrubber}
                             className="Video-scrubber"
-                            onMouseMove={this.scrubberPeek}
+                            onMouseMove={this.onSeek}
                             onMouseEnter={() => {this.handleVideoOverlayHover(0, true)}}
                             onMouseLeave={() => {
                                 this.handleVideoOverlayHover(0, false);
@@ -340,18 +316,20 @@ class Video extends React.Component {
                                 this.doSeek();
                             }}
                         >
-                            <div className="Video-scrubber-bg"></div>
+                            <div className="Video-scrubber-bg"
+                                ref={this.videoScrubberBar}
+                            ></div>
                             <div
                                 className="Video-scrubber-bar"
                                 style={{
-                                    width: (this.state.video_currentTimeFrac * 100) + '%'
+                                    width: ((this.state.video_time / this.state.video_duration) * 100) + '%'
                                 }}
                             ></div>
                             <div className="Video-scrubber-time"
                                 style={{
-                                    left: this.state.peek.left
+                                    left: ((this.state.seek_time / this.state.video_duration) * 100) + '%'
                                 }}
-                            >{this.getTime(this.state.peek.time)}</div>
+                            >{this.getTime(this.state.seek_time)}</div>
                         </div>
                     </div>
                 </figure>

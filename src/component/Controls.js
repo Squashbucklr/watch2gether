@@ -8,19 +8,15 @@ class Controls extends React.Component {
         this.usernameInput = React.createRef();
         this.elevateInput = React.createRef();
         this.urlInput = React.createRef();
-        this.needsUrlChange = false;
         this.state = {
             
         }
     }
 
-    shouldComponentUpdate = (nextProps, nextState) => {
-        this.needsUrlChange = this.props.video_url !== nextProps.video_url;
-        return true;
-    }
-
-    componentDidUpdate = () => {
-        if (this.needsUrlChange) this.urlInput.current.value = this.props.video_url;
+    componentDidUpdate = (prevProps, prevState) => {
+        if (this.props.video_data !== prevProps.video_data) {
+            this.urlInput.current.value = this.props.video_data.load_url;
+        }
     }
 
     setUsername = () => {
@@ -30,14 +26,14 @@ class Controls extends React.Component {
     }
 
     elevate = () => {
-        let username = this.elevateInput.current.value;
-        this.props.elevate(username);
+        let elevate_key = this.elevateInput.current.value;
+        this.props.elevate(elevate_key);
         this.elevateInput.current.value = "";
     }
 
-    setUrl = () => {
-        let username = this.urlInput.current.value;
-        this.props.setUrl(username);
+    setData = () => {
+        let load_url = this.urlInput.current.value;
+        this.props.setData(load_url);
     }
 
     enterKey = (fun) => {
