@@ -14,8 +14,8 @@ class Controls extends React.Component {
     }
 
     componentDidUpdate = (prevProps, prevState) => {
-        if (this.props.video_data !== prevProps.video_data) {
-            this.urlInput.current.value = this.props.video_data.load_url;
+        if (this.props.video_url !== prevProps.video_url) {
+            this.urlInput.current.value = this.props.video_url;
         }
     }
 
@@ -31,9 +31,9 @@ class Controls extends React.Component {
         this.elevateInput.current.value = "";
     }
 
-    setData = () => {
+    setUrl = () => {
         let load_url = this.urlInput.current.value;
-        this.props.setData(load_url);
+        this.props.setUrl(load_url);
     }
 
     enterKey = (fun) => {

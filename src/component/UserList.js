@@ -26,7 +26,7 @@ class UserList extends React.Component {
                     }}
                 >
                     {this.props.connections[connectionkeys[i]].username}
-                    {this.props.connections[connectionkeys[i]].host ? ' (host)' : ''}
+                    {this.props.connections[connectionkeys[i]].host ? <span className="UserList-host">{' (host)'}</span> : ''}
                 </div>
             );
         }

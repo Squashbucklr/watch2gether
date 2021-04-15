@@ -1,8 +1,9 @@
 import React from 'react';
 
 import './Video.scss';
+import SubtitlesOctopus from '../resources/subtitles-octopus';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faPlay,
     faPause,
@@ -11,23 +12,41 @@ import {
     faVolumeDown,
     faExpand,
     faCompress
-} from '@fortawesome/free-solid-svg-icons'
+} from '@fortawesome/free-solid-svg-icons';
+
+import https from 'https';
 
 const OFFSET_TOLERANCE = 0.5;
+
+const tmp_json = {
+    "video": "test.mp4",
+    "subs": "subs.ass",
+    "fonts": [
+            "FOT-KleePro-DB-Str.otf",
+            "GandhiSans-Bold.otf",
+            "GandhiSans-BoldItalic.otf",
+            "IwaMinPro-Md-Kami,.ttf",
+            "IwaOMinPro-Bd-Fate.ttf",
+            "times.ttf"
+    ]
+};
 
 class Video extends React.Component {
     constructor(props) {
         super(props);
-        this.needsTimeChange = true;
-        this.needsAudioChange = true;
-        this.needsSourceLoad = false;
         this.mouseTimeout = null;
         this.videoNode = React.createRef();
+        this.videoSourceNode = React.createRef();
         this.videoWrapper = React.createRef();
         this.videoScrubberBar = React.createRef();
         this.videoAudioScrubber = React.createRef();
         this.octopusInstance = null;
         this.audio_memory = 0;
+        this.video_data = {
+            url: "",
+            subs_url: "",
+            fonts: []
+        }
         this.state = {
             seeking: false,
             seek_time: 0,
@@ -72,8 +91,44 @@ class Video extends React.Component {
         }
     }
 
-    componentDidUpdate = (prevProps, prevState) => {
-        if (JSON.stringify(this.props.data) !== JSON.stringify(prevProps.data)) {
+    componentDidUpdate = async (prevProps, prevState) => {
+        if (this.props.url !== prevProps.url) {
+            if (this.octopusInstance) this.octopusInstance.dispose();
+            console.log(this.props.url);
+            if (this.props.url.endsWith('.json')) {
+                let data = await new Promise((resolve, reject) => {
+                    let options = new URL(this.props.url);
+                    options.method = 'GET';
+                    console.log(options);
+                    let req = https.request(this.props.url, res => {
+                        let body = '';
+                        res.on('data', partial => {
+                            body += partial;
+                        });
+                        res.on('end', () => {
+                            resolve(JSON.parse(body));
+                        });
+                    });
+                    req.end();
+                });
+                let preurl = this.props.url.substring(0, this.props.url.lastIndexOf('/') + 1);
+                this.videoSourceNode.current.setAttribute('src', preurl + data.video);
+                console.log(data);
+                let fonts = [];
+                for (let font of data.fonts) {
+                    fonts.push(preurl + font);
+                }
+                console.log('OCTOPUS');
+                this.octopusInstance = new SubtitlesOctopus({
+                    video: this.videoNode.current,
+                    subUrl: preurl + data.subs,
+                    fonts: fonts,
+                    lossyRender: true,
+                    workerUrl: process.env.PUBLIC_URL + '/subtitles-octopus-worker.js'
+                });
+            } else {
+                this.videoSourceNode.current.setAttribute('src', this.video_data.url);
+            }
             this.videoNode.current.load();
         }
         if (Math.abs(prevProps.time - this.props.time) > OFFSET_TOLERANCE || !this.props.play) {
@@ -91,7 +146,6 @@ class Video extends React.Component {
     }
 
     setVideoPosition = () => {
-        this.needsTimeChange = false;
         // important to note that this.props.time only changes when the websocket passes the video state.
         // it does not live update.
 
@@ -241,7 +295,7 @@ class Video extends React.Component {
                         }}
                         onDurationChange={() => {this.setState({video_duration: this.getDuration()})}}
                     >
-                        <source src={this.props.data.url}></source>
+                        <source ref={this.videoSourceNode}></source>
                     </video>
                     <div
                         className="Video-overlay"

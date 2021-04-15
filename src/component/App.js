@@ -15,7 +15,7 @@ class App extends React.Component {
         super(props);
         this.state = {
             connected: false,
-            video_data: "",
+            video_url: "",
             video_play: false,
             video_time: 0,
             lobby_id: qs.parse(window.location.search, { ignoreQueryPrefix: true }).id,
@@ -53,8 +53,8 @@ class App extends React.Component {
         wsMan.onPlay((video_play) => {
             this.setState({video_play});
         });
-        wsMan.onData((video_data) => {
-            this.setState({video_data});
+        wsMan.onUrl((video_url) => {
+            this.setState({video_url});
         });
         wsMan.onElevated((elevated) => {
             this.setState({elevated});
@@ -78,7 +78,7 @@ class App extends React.Component {
                 <div className="App">
                     <div className="App-left">
                         <Video
-                            data={this.state.video_data}
+                            url={this.state.video_url}
                             play={this.state.video_play}
                             time={this.state.video_time}
                             playPause={this.playPause}
@@ -89,9 +89,9 @@ class App extends React.Component {
                         <Controls
                             setUsername={wsMan.setUsername}
                             elevate={this.elevate}
-                            setData={wsMan.setData}
+                            setUrl={wsMan.setUrl}
                             lobby_id={this.state.lobby_id}
-                            video_data={this.state.video_data}
+                            video_url={this.state.video_url}
                             host={this.state.host}
                             elevated={this.state.elevated}
                         />

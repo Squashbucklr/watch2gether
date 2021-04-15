@@ -9,7 +9,7 @@ let onConnections = () => {};
 let onChat = () => {};
 let onSeek = () => {};
 let onPlay = () => {};
-let onData = () => {};
+let onUrl = () => {};
 let onElevated = () => {};
 
 const wsMan = {
@@ -19,7 +19,7 @@ const wsMan = {
     onChat: (fun) => {onChat = fun},
     onSeek: (fun) => {onSeek = fun},
     onPlay: (fun) => {onPlay = fun},
-    onData: (fun) => {onData = fun},
+    onUrl: (fun) => {onUrl = fun},
     onElevated: (fun) => {onElevated = fun},
     disconnect: () => {
         if(ws) ws.close();
@@ -47,7 +47,8 @@ const wsMan = {
                     onConnections(data.connections, data.host);
                     break; 
                 case 'video':
-                    onData(data.video.data);
+                    console.log(data);
+                    onUrl(data.video.url);
                     onSeek(data.video.time);
                     onPlay(data.video.play);
                     break;
@@ -86,10 +87,10 @@ const wsMan = {
             code
         }));
     },
-    setData: (data) => {
+    setUrl: (url) => {
         if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'url',
-            data
+            url
         }));
     },
     setUsername: (name) => {
