@@ -74,6 +74,10 @@ class App extends React.Component {
         wsMan.play(!this.state.video_play, time);
     }
 
+    fakePause = () => {
+        this.setState({video_play: false});
+    }
+
     elevate = (code) => {
         this.setState({elevated: false});
         wsMan.elevate(code);
@@ -93,6 +97,7 @@ class App extends React.Component {
                             play={this.state.video_play}
                             time={this.state.video_time}
                             playPause={this.playPause}
+                            fakePause={this.fakePause}
                             seek={wsMan.seek}
                         />
                     </div>

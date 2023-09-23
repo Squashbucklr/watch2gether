@@ -82,6 +82,10 @@ class Video extends React.Component {
         if (this.needsSourceLoad) this.videoNode.current.load();
         if (this.needsTimeChange) this.fixVideoPosition();
         if (this.needsAudioChange) this.fixAudioValue();
+        if (this.getCurrentTime() === this.getDuration() && this.props.play) {
+            console.log('fake pause');
+            this.props.fakePause();
+        }
         if (this.videoNode.current.paused && this.props.play &&
             this.getCurrentTime() < this.getDuration()) {
             this.videoNode.current.play();
