@@ -52,7 +52,7 @@ class Video extends React.Component {
                 switch (e.code) {
                     case 'Space':
                     case 'KeyK':
-                        this.props.playPause(this.getCurrentTime());
+                        this.props.playPause(this.getCurrentTime(), this.getDuration());
                         break;
                     case 'ArrowRight':
                     case 'KeyL':
@@ -82,7 +82,8 @@ class Video extends React.Component {
         if (this.needsSourceLoad) this.videoNode.current.load();
         if (this.needsTimeChange) this.fixVideoPosition();
         if (this.needsAudioChange) this.fixAudioValue();
-        if (this.videoNode.current.paused && this.props.play) {
+        if (this.videoNode.current.paused && this.props.play &&
+            this.getCurrentTime() < this.getDuration()) {
             this.videoNode.current.play();
         } else if (!this.videoNode.current.paused && !this.props.play) {
             this.videoNode.current.pause();
@@ -274,7 +275,7 @@ class Video extends React.Component {
                             className="Video-play"
                             onMouseOver={() => {this.handleVideoOverlayHover(1, true)}}
                             onMouseOut={() => {this.handleVideoOverlayHover(1, false)}}
-                            onClick={() => {this.props.playPause(this.getCurrentTime())}}
+                            onClick={() => {this.props.playPause(this.getCurrentTime(), this.getDuration())}}
                         ><FontAwesomeIcon icon={this.props.play ? faPause : faPlay} /></div>
                         <div
                             className="Video-audio"

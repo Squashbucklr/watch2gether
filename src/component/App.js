@@ -69,7 +69,8 @@ class App extends React.Component {
         wsMan.init(this.state.lobby_id);
     }
 
-    playPause = (time) => {
+    playPause = (time, duration) => {
+        if (!this.state.video_play && time === duration) time = 0;
         wsMan.play(!this.state.video_play, time);
     }
 
