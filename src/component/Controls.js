@@ -40,6 +40,12 @@ class Controls extends React.Component {
         this.props.setUrl(username);
     }
 
+    mpv = (command) => {
+        return () => {
+            this.props.mpv(command);
+        }
+    }
+
     enterKey = (fun) => {
         return (event) => {
             if (event.which === 13) {
@@ -61,6 +67,19 @@ class Controls extends React.Component {
                 <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                     <input onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
                     <button className={this.props.elevated ? "Controls-green" : ""} onClick={this.elevate}>Elevate</button>
+                </div>
+                <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
+                    <button onClick={this.mpv('display')}>Display</button>
+                    <button onClick={this.mpv('subcycle')}>S cycle</button>
+                    <button onClick={this.mpv('audiocycle')}>A cycle</button>
+                    <button onClick={this.mpv('voldown')}>Vol -</button>
+                    <button onClick={this.mpv('volup')}>Vol +</button>
+                </div>
+                <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
+                    <button onClick={this.mpv('subdelaydown')}>SD -</button>
+                    <button onClick={this.mpv('subdelayup')}>SD +</button>
+                    <button onClick={this.mpv('audiodelaydown')}>AD -</button>
+                    <button onClick={this.mpv('audiodelayup')}>AD +</button>
                 </div>
                 <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                     <textarea

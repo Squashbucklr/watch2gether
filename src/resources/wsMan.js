@@ -86,6 +86,12 @@ const wsMan = {
             code
         }));
     },
+    mpv: (command) => {
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
+            type: 'mpv',
+            command
+        }));
+    },
     setUrl: (url) => {
         if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'url',

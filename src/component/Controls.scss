@@ -58,10 +58,20 @@
             flex: 0 0 auto;
             box-shadow: 0px 0px 10px #000C;
             outline: none;
+
         }
 
         & .Controls-green {
             background-color: #338833;
+        }
+
+        &.Controls-buttons {
+            gap: 15px;
+
+            & button {
+                flex: 1 0 0px;
+                height: 28px;
+            }
         }
     }
 }

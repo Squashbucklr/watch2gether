@@ -22,6 +22,7 @@ class App extends React.Component {
             chats: [],
             connections: {},
             host: false,
+            hasmpv: false,
             elevated: false 
         }
     }
@@ -40,7 +41,12 @@ class App extends React.Component {
             this.setState({connected: false});
         });
         wsMan.onConnections((connections, host) => {
-            this.setState({connections, host});
+            let hasmpv = false;
+            let connectionids = Object.keys(connections);
+            for (let i = 0; i < connectionids.length; i++) {
+                if (connections[connectionids[i]].mpv) hasmpv = true;
+            }
+            this.setState({connections, host, hasmpv});
         });
         wsMan.onChat((from, chat) => {
             let chats = [...this.state.chats];
@@ -72,6 +78,10 @@ class App extends React.Component {
         wsMan.elevate(code);
     }
 
+    mpv = (command) => {
+        wsMan.mpv(command);
+    }
+
     render() {
         if (this.state.connected) {
             return (
@@ -89,10 +99,12 @@ class App extends React.Component {
                         <Controls
                             setUsername={wsMan.setUsername}
                             elevate={this.elevate}
+                            mpv={this.mpv}
                             setUrl={wsMan.setUrl}
                             lobby_id={this.state.lobby_id}
                             video_url={this.state.video_url}
                             host={this.state.host}
+                            hasmpv={this.state.hasmpv}
                             elevated={this.state.elevated}
                         />
                         <UserList
