@@ -65,7 +65,7 @@ class Controls extends React.Component {
                     <button onClick={this.setUsername}>Set Username</button>
                 </div>
                 <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
-                    <input onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
+                    <input type="password" onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
                     <button className={this.props.elevated ? "Controls-green" : ""} onClick={this.elevate}>Elevate</button>
                 </div>
                 <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
