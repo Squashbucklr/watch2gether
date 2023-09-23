@@ -13,7 +13,7 @@ import {
     faCompress
 } from '@fortawesome/free-solid-svg-icons'
 
-const OFFSET_TOLERANCE = 0.75;
+const OFFSET_TOLERANCE = 0.25;
 
 class Video extends React.Component {
     constructor(props) {
