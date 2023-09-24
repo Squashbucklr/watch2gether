@@ -23,6 +23,7 @@ class App extends React.Component {
             chats: [],
             connections: {},
             host: false,
+            connectionid: "",
             hasmpv: false,
             elevated: false 
         }
@@ -41,13 +42,13 @@ class App extends React.Component {
             console.log('disconnected');
             this.setState({connected: false});
         });
-        wsMan.onConnections((connections, host) => {
+        wsMan.onConnections((connections, host, connectionid) => {
             let hasmpv = false;
             let connectionids = Object.keys(connections);
             for (let i = 0; i < connectionids.length; i++) {
                 if (connections[connectionids[i]].mpv) hasmpv = true;
             }
-            this.setState({connections, host, hasmpv});
+            this.setState({connections, host, connectionid, hasmpv});
         });
         wsMan.onChat((from, chat) => {
             let chats = [...this.state.chats];
@@ -132,6 +133,7 @@ class App extends React.Component {
                         <UserList
                             connections={this.state.connections}
                             host={this.state.host}
+                            connectionid={this.state.connectionid}
                             userClick={this.userClick}
                         />
                         <Chat

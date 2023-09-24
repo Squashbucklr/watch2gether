@@ -40,7 +40,7 @@ const wsMan = {
                     onDisconnect();
                     break;
                 case 'connections':
-                    onConnections(data.connections, data.host);
+                    onConnections(data.connections, data.host, data.connectionid);
                     break; 
                 case 'video':
                     onVideo(data.video.url, data.video.time, data.video.play);

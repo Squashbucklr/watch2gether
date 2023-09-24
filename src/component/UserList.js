@@ -44,7 +44,7 @@ class UserList extends React.Component {
             list.push(
                 <div
                     key={'uli' + i}
-                    className="UserList-entry"
+                    className={'UserList-entry' + (this.props.connectionid == connectionkeys[i] ? ' UserList-me' : '')}
                     onClick={() => {
                         if (this.props.host) {
                             this.props.userClick(connectionkeys[i]);
