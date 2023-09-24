@@ -16,6 +16,7 @@ class UserList extends React.Component {
         let connectionkeys = Object.keys(this.props.connections);
         for (let i = 0; i < connectionkeys.length; i++) {
             let indicator = null;
+            let mpvcontrol = null;
             if (this.props.connections[connectionkeys[i]].host) {
                 indicator =
                     <span
@@ -31,6 +32,14 @@ class UserList extends React.Component {
                     >
                         {' (mpv-w2g)'}
                     </span>
+                if (this.props.connections[connectionkeys[i]].mpvctrl) {
+                    mpvcontrol = 
+                        <span
+                            className="UserList-mpvctrl"
+                        >
+                            {'> '}
+                        </span>
+                }
             }
             list.push(
                 <div
@@ -38,10 +47,11 @@ class UserList extends React.Component {
                     className="UserList-entry"
                     onClick={() => {
                         if (this.props.host) {
-                            this.props.setHost(connectionkeys[i]);
+                            this.props.userClick(connectionkeys[i]);
                         }
                     }}
                 >
+                    {mpvcontrol}
                     {this.props.connections[connectionkeys[i]].username}
                     {indicator}
                 </div>

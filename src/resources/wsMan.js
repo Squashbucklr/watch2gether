@@ -109,6 +109,12 @@ const wsMan = {
             type: 'host',
             connectionid
         }));
+    },
+    setMpvControl: (connectionid) => {
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
+            type: 'mpvctrl',
+            connectionid
+        }));
     }
 }
 

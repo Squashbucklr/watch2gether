@@ -95,6 +95,14 @@ class App extends React.Component {
         wsMan.mpv(command);
     }
 
+    userClick = (connectionid) => {
+        if (this.state.connections[connectionid].mpv) {
+            wsMan.setMpvControl(connectionid);
+        } else {
+            wsMan.setHost(connectionid);
+        }
+    }
+
     render() {
         if (this.state.connected) {
             return (
@@ -124,7 +132,7 @@ class App extends React.Component {
                         <UserList
                             connections={this.state.connections}
                             host={this.state.host}
-                            setHost={wsMan.setHost}
+                            userClick={this.userClick}
                         />
                         <Chat
                             chats={this.state.chats}
