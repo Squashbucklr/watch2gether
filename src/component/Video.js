@@ -32,7 +32,7 @@ class Video extends React.Component {
             seeking: false,
             seekingAudio: false,
             videoOverlayHovers: [false, false, false, false, false, false, false],
-            video_currentTimeStamp: 0,
+            video_currentTimeStamp: '00:00',
             video_currentTimeFrac: 0,
             video_duration: 0,
             video_fullscreen: false,
