@@ -1,15 +1,13 @@
 import config from '../config.json';
 
 let ws = null;
-let silentpingpong = false;
+let pingpongtimeout = null;
 
 let onConnect = () => {};
 let onDisconnect = () => {};
 let onConnections = () => {};
 let onChat = () => {};
-let onSeek = () => {};
-let onPlay = () => {};
-let onUrl = () => {};
+let onVideo = () => {};
 let onElevated = () => {};
 
 const wsMan = {
@@ -17,9 +15,7 @@ const wsMan = {
     onDisconnect: (fun) => {onDisconnect = fun},
     onConnections: (fun) => {onConnections = fun},
     onChat: (fun) => {onChat = fun},
-    onSeek: (fun) => {onSeek = fun},
-    onPlay: (fun) => {onPlay = fun},
-    onUrl: (fun) => {onUrl = fun},
+    onVideo: (fun) => {onVideo = fun},
     onElevated: (fun) => {onElevated = fun},
     disconnect: () => {
         if(ws) ws.close();
@@ -36,7 +32,7 @@ const wsMan = {
             let data = JSON.parse(msg.data);
             switch(data.type) {
                 case 'pong':
-                    if (!silentpingpong) console.log('...pong');
+                    clearTimeout(pingpongtimeout);
                     break;
                 case 'invalid':
                     console.log('Invalid lobby id');
@@ -47,9 +43,7 @@ const wsMan = {
                     onConnections(data.connections, data.host);
                     break; 
                 case 'video':
-                    onUrl(data.video.url);
-                    onSeek(data.video.time);
-                    onPlay(data.video.play);
+                    onVideo(data.video.url, data.video.time, data.video.play);
                     break;
                 case 'message':
                     onChat(data.from, data.message)
@@ -125,6 +119,9 @@ function pingLoop() {
     ws.send(JSON.stringify({
         type: 'ping' 
     })); 
-    if (!silentpingpong) console.log('ping...');
+    clearTimeout(pingpongtimeout);
+    pingpongtimeout = setTimeout(() => {
+        console.log('didn\'t receive pong within 5 seconds...');
+    }, 5000);
     setTimeout(pingLoop, 15000);                    
 }

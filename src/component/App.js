@@ -17,6 +17,7 @@ class App extends React.Component {
             connected: false,
             video_url: "",
             video_play: false,
+            ws_video_play: false,
             video_time: 0,
             lobby_id: qs.parse(window.location.search, { ignoreQueryPrefix: true }).id,
             chats: [],
@@ -53,14 +54,13 @@ class App extends React.Component {
             chats.push({from, chat});
             this.setState({chats});
         });
-        wsMan.onSeek((video_time) => {
-            this.setState({video_time});
-        });
-        wsMan.onPlay((video_play) => {
-            this.setState({video_play});
-        });
-        wsMan.onUrl((video_url) => {
-            this.setState({video_url});
+        wsMan.onVideo((video_url, video_time, video_play) => {
+            this.setState({
+                video_url,
+                video_time,
+                video_play,
+                ws_video_play: video_play
+            });
         });
         wsMan.onElevated((elevated) => {
             this.setState({elevated});
@@ -72,6 +72,14 @@ class App extends React.Component {
     playPause = (time, duration) => {
         if (!this.state.video_play && time === duration) time = 0;
         wsMan.play(!this.state.video_play, time);
+    }
+
+    seek = (time, vp_pause) => {
+        if (vp_pause && this.state.ws_video_play) {
+            wsMan.play(false, time);
+        } else {
+            wsMan.seek(time);
+        }
     }
 
     fakePause = () => {
@@ -98,7 +106,7 @@ class App extends React.Component {
                             time={this.state.video_time}
                             playPause={this.playPause}
                             fakePause={this.fakePause}
-                            seek={wsMan.seek}
+                            seek={this.seek}
                         />
                     </div>
                     <div className="App-right">

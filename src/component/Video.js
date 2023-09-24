@@ -21,6 +21,7 @@ class Video extends React.Component {
         this.needsTimeChange = true;
         this.needsAudioChange = true;
         this.needsSourceLoad = false;
+        this.needsPlayChange = true;
         this.mouseTimeout = null;
         this.videoNode = React.createRef();
         this.videoWrapper = React.createRef();
@@ -47,7 +48,6 @@ class Video extends React.Component {
     componentDidMount = () => {
         this.fixVideoPosition();
         document.onkeydown = (e) => {
-            console.log(e);
             if (e.target.localName !== 'input' && e.target.localName !== 'textarea') {
                 switch (e.code) {
                     case 'Space':
@@ -56,13 +56,13 @@ class Video extends React.Component {
                         break;
                     case 'ArrowRight':
                     case 'KeyL':
-                        if (e.shiftKey) this.props.seek(this.getCurrentTime() + 85);
-                        else this.props.seek(this.getCurrentTime() + 5);
+                        if (e.shiftKey) this.props.seek(this.getCurrentTime() + 85, this.getPause());
+                        else this.props.seek(this.getCurrentTime() + 5, this.getPause());
                         break;
                     case 'ArrowLeft':
                     case 'KeyJ':
-                        if (e.shiftKey) this.props.seek(this.getCurrentTime() - 85);
-                        else this.props.seek(this.getCurrentTime() - 5);
+                        if (e.shiftKey) this.props.seek(this.getCurrentTime() - 85, this.getPause());
+                        else this.props.seek(this.getCurrentTime() - 5, this.getPause());
                         break;
                     case 'KeyF':
                         this.handleFullscreen();
@@ -72,9 +72,10 @@ class Video extends React.Component {
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
-        this.needsTimeChange = Math.abs(this.props.time - nextProps.time) > 0.01;
         this.needsAudioChange = Math.abs(this.state.video_audio_level - nextState.video_audio_level) > 0.001;
         this.needsSourceLoad = this.props.url !== nextProps.url;
+        this.needsPlayChange = this.props.play !== nextProps.play;
+        this.needsTimeChange = Math.abs(this.props.time - nextProps.time) > 0.01;
         return true;
     }
 
@@ -82,21 +83,22 @@ class Video extends React.Component {
         if (this.needsSourceLoad) this.videoNode.current.load();
         if (this.needsTimeChange) this.fixVideoPosition();
         if (this.needsAudioChange) this.fixAudioValue();
-        if (this.getCurrentTime() === this.getDuration() && this.props.play) {
-            console.log('fake pause');
-            this.props.fakePause();
+        if (this.needsPlayChange) {
+            if (this.videoNode.current.paused && this.props.play &&
+                this.getCurrentTime() < this.getDuration()) {
+                this.videoNode.current.play();
+            } else if (!this.videoNode.current.paused && !this.props.play) {
+                this.videoNode.current.pause();
+            }
         }
-        if (this.videoNode.current.paused && this.props.play &&
-            this.getCurrentTime() < this.getDuration()) {
-            this.videoNode.current.play();
-        } else if (!this.videoNode.current.paused && !this.props.play) {
-            this.videoNode.current.pause();
+        if (this.getCurrentTime() === this.getDuration() && this.props.play) {
+            this.props.fakePause();
         }
     }
 
     fixVideoPosition = () => {
         this.needsScrub = false;
-        if (!this.props.play || Math.abs(this.getCurrentTime() - this.props.time) > OFFSET_TOLERANCE) {
+        if (this.props.play || Math.abs(this.getCurrentTime() - this.props.time) > OFFSET_TOLERANCE) {
             // important to note that this.props.time only changes when the websocket passes the video state.
             // it does not live update.
             this.videoNode.current.currentTime = this.props.time;
@@ -180,7 +182,7 @@ class Video extends React.Component {
 
     doSeek = () => {
         if(this.state.seeking) {
-            this.props.seek(this.state.peek.time);
+            this.props.seek(this.state.peek.time, this.getPause());
         }
         this.setState({seeking: false});
     }
@@ -201,6 +203,10 @@ class Video extends React.Component {
 
     getDuration = () => {
         return this.videoNode ? this.videoNode.current ? this.videoNode.current.duration : 0 : 0;
+    }
+
+    getPause = () => {
+        return this.videoNode ? this.videoNode.current ? this.videoNode.current.paused : true : true;
     }
 
     isFullScreen = () => {
