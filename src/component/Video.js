@@ -43,7 +43,9 @@ class Video extends React.Component {
             peek: {
                 left: 0,
                 time: 0
-            }
+            },
+            fake: false,
+            fakestamp: null
         }
     }
 
@@ -82,14 +84,14 @@ class Video extends React.Component {
     }
 
     componentDidUpdate = () => {
-        if (this.needsSourceLoad) this.videoNode.current.load();
+        if (this.needsSourceLoad) this.loadVideo();
         if (this.needsAudioChange) this.fixAudioValue();
         if (this.needsPlayChange) {
-            if (this.videoNode.current.paused && this.props.play &&
+            if (this.isVideoPaused() && this.props.play &&
                 this.getCurrentTime() < this.getDuration()) {
-                this.videoNode.current.play();
+                this.playVideo();
             } else if (!this.videoNode.current.paused && !this.props.play) {
-                this.videoNode.current.pause();
+                this.pauseVideo();
             }
         }
         if (this.needsTimeChange) this.fixVideoPosition();
@@ -101,13 +103,53 @@ class Video extends React.Component {
         }
     }
 
+    loadVideo = () => {
+        if (this.state.fake) {
+
+        } else {
+            this.videoNode.current.load();
+        }
+    }
+
+    isVideoPaused = () => {
+        if (this.state.fake) {
+
+        } else {
+            return this.videoNode.current.paused;
+        }
+    }
+
+    playVideo = () => {
+        if (this.state.fake) {
+
+        } else {
+            this.videoNode.current.play();
+        }
+    }
+
+    pauseVideo = () => {
+        if (this.state.fake) {
+
+        } else {
+            this.videoNode.current.pause();
+        }
+    }
+
+    setCurrentTime = (time) => {
+        if (this.state.fake) {
+
+        } else {
+            this.videoNode.current.currentTime = time;
+        }
+    }
+
     fixVideoPosition = () => {
         console.log(this.props.play);
         this.needsScrub = false;
         if (!this.props.play || Math.abs(this.getCurrentTime() - this.props.time) > OFFSET_TOLERANCE) {
             // important to note that this.props.time only changes when the websocket passes the video state.
             // it does not live update.
-            this.videoNode.current.currentTime = this.props.time;
+            this.setCurrentTime(this.props.time);
             let frac = this.props.time / this.getDuration();
             if (isNaN(frac)) frac = 0;
             this.setState({
@@ -118,25 +160,35 @@ class Video extends React.Component {
     }
 
     fixAudioValue = () => {
-        this.videoNode.current.volume = this.state.video_audio_level;
+        if (this.state.fake) {
+
+        } else {
+            this.videoNode.current.volume = this.state.video_audio_level;
+        }
     }
 
     scrubberPeek = (e) => {
-        let scrubBox = this.videoScrubber.current.getBoundingClientRect();
-        let scrubThru = ((e.pageX - scrubBox.x) / scrubBox.width);
-        if (scrubThru <= 0) scrubThru = 0;
-        if (scrubThru >= 1) scrubThru = 1;
-        this.scrubFrac(scrubThru);
-        
+        if (this.state.fake) {
+
+        } else {
+            let scrubBox = this.videoScrubber.current.getBoundingClientRect();
+            let scrubThru = ((e.pageX - scrubBox.x) / scrubBox.width);
+            if (scrubThru <= 0) scrubThru = 0;
+            if (scrubThru >= 1) scrubThru = 1;
+            this.scrubFrac(scrubThru);
+       } 
     }
 
     scrubberAudioPeek = (e) => {
-        let scrubBox = this.videoAudioScrubber.current.getBoundingClientRect();
-        let scrubThru = 1 - ((e.pageY - scrubBox.y) / (scrubBox.height - 5));
-        if (scrubThru <= 0) scrubThru = 0;
-        if (scrubThru >= 1) scrubThru = 1;
-        this.scrubAudioFrac(scrubThru);
-        
+        if (this.state.fake) {
+
+        } else {
+            let scrubBox = this.videoAudioScrubber.current.getBoundingClientRect();
+            let scrubThru = 1 - ((e.pageY - scrubBox.y) / (scrubBox.height - 5));
+            if (scrubThru <= 0) scrubThru = 0;
+            if (scrubThru >= 1) scrubThru = 1;
+            this.scrubAudioFrac(scrubThru);
+       } 
     }
 
     scrubFrac = (frac) => {
@@ -226,29 +278,31 @@ class Video extends React.Component {
      }
 
     handleFullscreen = () => {
-        if (this.isFullScreen()) {
-            if (document.exitFullscreen) document.exitFullscreen();
-            else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
-            else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
-            else if (document.msExitFullscreen) document.msExitFullscreen();
-        }
-        else {
-            if (this.videoWrapper.current.requestFullscreen) this.videoWrapper.current.requestFullscreen();
-            else if (this.videoWrapper.current.mozRequestFullScreen) this.videoWrapper.current.mozRequestFullScreen();
-            else if (this.videoWrapper.current.webkitRequestFullScreen)
-                this.videoWrapper.current.webkitRequestFullScreen();
-            else if (this.videoWrapper.current.msRequestFullscreen) this.videoWrapper.current.msRequestFullscreen();
+        if (!this.state.fake) {
+            if (this.isFullScreen()) {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
+            }
+            else {
+                if (this.videoWrapper.current.requestFullscreen) this.videoWrapper.current.requestFullscreen();
+                else if (this.videoWrapper.current.mozRequestFullScreen) this.videoWrapper.current.mozRequestFullScreen();
+                else if (this.videoWrapper.current.webkitRequestFullScreen)
+                    this.videoWrapper.current.webkitRequestFullScreen();
+                else if (this.videoWrapper.current.msRequestFullscreen) this.videoWrapper.current.msRequestFullscreen();
+            }
         }
     }
 
     fakeSkipRight = () => {
         let newtime = Math.min(this.getCurrentTime() + 1, this.getDuration());
-        this.videoNode.current.currentTime = newtime;
+        this.setCurrentTime(newtime)
     }
 
     fakeSkipLeft = () => {
         let newtime = Math.max(this.getCurrentTime() - 0.2, 0);
-        this.videoNode.current.currentTime = newtime;
+        this.setCurrentTime(newtime)
     }
 
     handleVideoOverlayHover = (zone, hover) => {
