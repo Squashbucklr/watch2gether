@@ -29,7 +29,7 @@ class App extends React.Component {
             elevated: false,
             sapped: false,
             genStamp: false,
-            fakeVideo: false
+            fakeVideo: params.get('fake') == 'true'
         }
     }
 
@@ -87,8 +87,8 @@ class App extends React.Component {
         wsMan.play(!this.state.video_play, time);
     }
 
-    seek = (time, vp_pause) => {
-        if (vp_pause && this.state.ws_video_play) {
+    seek = (time) => {
+        if (!this.state.ws_video_play) {
             wsMan.play(false, time);
         } else {
             wsMan.seek(time);
@@ -109,6 +109,7 @@ class App extends React.Component {
             let params = new URLSearchParams(window.location.search);
             params.set('sap', key);
             window.history.replaceState({}, "", window.location.pathname + '?' + params.toString());
+            this.setState({start_sap: key});
         }
         wsMan.sap();
     }

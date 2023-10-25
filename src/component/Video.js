@@ -25,11 +25,14 @@ class Video extends React.Component {
         this.needsSourceLoad = false;
         this.needsPlayChange = true;
         this.mouseTimeout = null;
+        this.fakeTimeUpdateTimeout = null;
         this.videoNode = React.createRef();
         this.videoWrapper = React.createRef();
         this.videoScrubber = React.createRef();
         this.videoAudioScrubber = React.createRef();
         this.audio_memory = 0;
+        this.fakestamp = null;
+        this.fakeplay = false;
         this.state = {
             seeking: false,
             seekingAudio: false,
@@ -43,8 +46,7 @@ class Video extends React.Component {
             peek: {
                 left: 0,
                 time: 0
-            },
-            fakestamp: null
+            }
         }
     }
 
@@ -59,13 +61,13 @@ class Video extends React.Component {
                         break;
                     case 'ArrowRight':
                     case 'KeyL':
-                        if (e.shiftKey) this.props.seek(this.getCurrentTime() + 85, this.getPause());
-                        else this.props.seek(Math.min(this.getCurrentTime() + 5, this.getDuration()), this.getPause());
+                        if (e.shiftKey) this.props.seek(this.getCurrentTime() + 85);
+                        else this.props.seek(Math.min(this.getCurrentTime() + 5, this.getDuration()));
                         break;
                     case 'ArrowLeft':
                     case 'KeyJ':
-                        if (e.shiftKey) this.props.seek(this.getCurrentTime() - 85, this.getPause());
-                        else this.props.seek(Math.max(this.getCurrentTime() - 5, 0), this.getPause());
+                        if (e.shiftKey) this.props.seek(this.getCurrentTime() - 85);
+                        else this.props.seek(Math.max(this.getCurrentTime() - 5, 0));
                         break;
                     case 'KeyF':
                         this.handleFullscreen();
@@ -77,7 +79,7 @@ class Video extends React.Component {
     shouldComponentUpdate = (nextProps, nextState) => {
         this.needsAudioChange = Math.abs(this.state.video_audio_level - nextState.video_audio_level) > 0.001;
         this.needsSourceLoad = this.props.url !== nextProps.url;
-        this.needsPlayChange = this.props.play !== nextProps.play;
+        this.needsPlayChange = true || this.props.play !== nextProps.play; // load video makes this kinda bad
         this.needsTimeChange = Math.abs(this.props.time - nextProps.time) > 0.001;
         return true;
     }
@@ -103,43 +105,92 @@ class Video extends React.Component {
     }
 
     loadVideo = () => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             this.videoNode.current.load();
         }
     }
 
     isVideoPaused = () => {
         if (this.props.fake) {
-
+            return !this.fakeplay;
         } else {
             return this.videoNode.current.paused;
         }
     }
 
     playVideo = () => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             this.videoNode.current.play();
+        }
+
+        if (!this.fakeplay) {
+            let playtime = ((new Date()).valueOf() / 1000) - this.getCurrentTime();
+            this.fakestamp = playtime;
+            this.fakeplay = true;
+            this.fakeTimeUpdate();
         }
     }
 
     pauseVideo = () => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             this.videoNode.current.pause();
+        }
+
+        if (this.fakeplay) {
+            let curtime = this.getCurrentTime();
+            this.fakestamp = curtime;
+            this.fakeplay = false;
+            clearTimeout(this.fakeTimeUpdateTimeout);
         }
     }
 
     setCurrentTime = (time) => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             this.videoNode.current.currentTime = time;
         }
+
+        if (this.fakeplay) {
+            let newtime = ((new Date()).valueOf() / 1000) - time;
+            this.fakestamp = newtime;
+        } else {
+            this.fakestamp = time;
+        }
+    }
+
+    getCurrentTime = () => {
+        if (this.props.fake) {
+            if (this.fakeplay) {
+                let curtime = ((new Date()).valueOf() / 1000);
+                return curtime - this.fakestamp;
+            } else {
+                return this.fakestamp;
+            }
+        } else {
+            return this.videoNode ? this.videoNode.current ? this.videoNode.current.currentTime : 0 : 0;
+        }
+    }
+
+    getDuration = () => {
+        if (this.props.fake) {
+            return Number.POSITIVE_INFINITY;
+        } else {
+            return this.videoNode ? this.videoNode.current ? this.videoNode.current.duration : 0 : 0;
+        }
+    }
+
+    fakeTimeUpdate = () => {
+        clearTimeout(this.fakeTimeUpdateTimeout);
+        if (this.props.fake) {
+            this.timeUpdate();
+            this.fakeTimeUpdateTimeout = setTimeout(this.fakeTimeUpdate, 100);
+        }
+    }
+
+    timeUpdate = () => {
+        this.setState({
+            video_currentTimeStamp: this.getTime(this.getCurrentTime()),
+            video_currentTimeFrac: this.getCurrentTime() / this.getDuration()
+        });
     }
 
     fixVideoPosition = () => {
@@ -159,17 +210,13 @@ class Video extends React.Component {
     }
 
     fixAudioValue = () => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             this.videoNode.current.volume = this.state.video_audio_level;
         }
     }
 
     scrubberPeek = (e) => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             let scrubBox = this.videoScrubber.current.getBoundingClientRect();
             let scrubThru = ((e.pageX - scrubBox.x) / scrubBox.width);
             if (scrubThru <= 0) scrubThru = 0;
@@ -179,9 +226,7 @@ class Video extends React.Component {
     }
 
     scrubberAudioPeek = (e) => {
-        if (this.props.fake) {
-
-        } else {
+        if (!this.props.fake) {
             let scrubBox = this.videoAudioScrubber.current.getBoundingClientRect();
             let scrubThru = 1 - ((e.pageY - scrubBox.y) / (scrubBox.height - 5));
             if (scrubThru <= 0) scrubThru = 0;
@@ -239,7 +284,7 @@ class Video extends React.Component {
 
     doSeek = () => {
         if(this.state.seeking) {
-            this.props.seek(this.state.peek.time, this.getPause());
+            this.props.seek(this.state.peek.time);
         }
         this.setState({seeking: false});
     }
@@ -252,30 +297,6 @@ class Video extends React.Component {
             this.setState({video_audio_level: this.state.peekAudio.value})
         }
         this.setState({seekingAudio: false});
-    }
-
-    getCurrentTime = () => {
-        if (this.props.fake) {
-
-        } else {
-            return this.videoNode ? this.videoNode.current ? this.videoNode.current.currentTime : 0 : 0;
-        }
-    }
-
-    getDuration = () => {
-        if (this.props.fake) {
-
-        } else {
-            return this.videoNode ? this.videoNode.current ? this.videoNode.current.duration : 0 : 0;
-        }
-    }
-
-    getPause = () => {
-        if (this.props.fake) {
-
-        } else {
-            return this.videoNode ? this.videoNode.current ? this.videoNode.current.paused : true : true;
-        }
     }
 
     isFullScreen = () => {
@@ -304,6 +325,14 @@ class Video extends React.Component {
                 else if (this.videoWrapper.current.msRequestFullscreen) this.videoWrapper.current.msRequestFullscreen();
             }
         }
+    }
+
+    skipRight = () => {
+        this.props.seek(this.getCurrentTime() + 5);
+    }
+
+    skipLeft = () => {
+        this.props.seek(this.getCurrentTime() - 5);
     }
 
     fakeSkipRight = () => {
@@ -337,7 +366,16 @@ class Video extends React.Component {
         if (this.props.fake) {
             return (
                 <div className="FakeVideo">
-                    fake!
+                    <button onClick={() => {this.props.playPause(this.getCurrentTime(), this.getDuration())}}>
+                        <FontAwesomeIcon icon={this.props.play ? faPause : faPlay} />
+                    </button>
+                    <div>{this.state.video_currentTimeStamp}</div>
+                    <button onClick={this.skipLeft}>
+                        <FontAwesomeIcon icon={faAnglesLeft} />
+                    </button>
+                    <button onClick={this.skipRight}>
+                        <FontAwesomeIcon icon={faAnglesRight} />
+                    </button>
                 </div>
             );
         } else {
@@ -356,12 +394,7 @@ class Video extends React.Component {
                         <video
                             ref={this.videoNode}
                             className="Video-video"
-                            onTimeUpdate={() => {
-                                this.setState({
-                                    video_currentTimeStamp: this.getTime(this.getCurrentTime()),
-                                    video_currentTimeFrac: this.getCurrentTime() / this.getDuration()
-                                })
-                            }}
+                            onTimeUpdate={this.timeUpdate}
                             onDurationChange={() => {this.setState({video_duration: this.getDuration()})}}
                         >
                             <source src={this.props.url}></source>
