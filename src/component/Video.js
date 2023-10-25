@@ -44,7 +44,6 @@ class Video extends React.Component {
                 left: 0,
                 time: 0
             },
-            fake: false,
             fakestamp: null
         }
     }
@@ -90,7 +89,7 @@ class Video extends React.Component {
             if (this.isVideoPaused() && this.props.play &&
                 this.getCurrentTime() < this.getDuration()) {
                 this.playVideo();
-            } else if (!this.videoNode.current.paused && !this.props.play) {
+            } else if (!this.isVideoPaused() && !this.props.play) {
                 this.pauseVideo();
             }
         }
@@ -104,7 +103,7 @@ class Video extends React.Component {
     }
 
     loadVideo = () => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             this.videoNode.current.load();
@@ -112,7 +111,7 @@ class Video extends React.Component {
     }
 
     isVideoPaused = () => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             return this.videoNode.current.paused;
@@ -120,7 +119,7 @@ class Video extends React.Component {
     }
 
     playVideo = () => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             this.videoNode.current.play();
@@ -128,7 +127,7 @@ class Video extends React.Component {
     }
 
     pauseVideo = () => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             this.videoNode.current.pause();
@@ -136,7 +135,7 @@ class Video extends React.Component {
     }
 
     setCurrentTime = (time) => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             this.videoNode.current.currentTime = time;
@@ -160,7 +159,7 @@ class Video extends React.Component {
     }
 
     fixAudioValue = () => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             this.videoNode.current.volume = this.state.video_audio_level;
@@ -168,7 +167,7 @@ class Video extends React.Component {
     }
 
     scrubberPeek = (e) => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             let scrubBox = this.videoScrubber.current.getBoundingClientRect();
@@ -180,7 +179,7 @@ class Video extends React.Component {
     }
 
     scrubberAudioPeek = (e) => {
-        if (this.state.fake) {
+        if (this.props.fake) {
 
         } else {
             let scrubBox = this.videoAudioScrubber.current.getBoundingClientRect();
@@ -256,15 +255,27 @@ class Video extends React.Component {
     }
 
     getCurrentTime = () => {
-        return this.videoNode ? this.videoNode.current ? this.videoNode.current.currentTime : 0 : 0;
+        if (this.props.fake) {
+
+        } else {
+            return this.videoNode ? this.videoNode.current ? this.videoNode.current.currentTime : 0 : 0;
+        }
     }
 
     getDuration = () => {
-        return this.videoNode ? this.videoNode.current ? this.videoNode.current.duration : 0 : 0;
+        if (this.props.fake) {
+
+        } else {
+            return this.videoNode ? this.videoNode.current ? this.videoNode.current.duration : 0 : 0;
+        }
     }
 
     getPause = () => {
-        return this.videoNode ? this.videoNode.current ? this.videoNode.current.paused : true : true;
+        if (this.props.fake) {
+
+        } else {
+            return this.videoNode ? this.videoNode.current ? this.videoNode.current.paused : true : true;
+        }
     }
 
     isFullScreen = () => {
@@ -278,7 +289,7 @@ class Video extends React.Component {
      }
 
     handleFullscreen = () => {
-        if (!this.state.fake) {
+        if (!this.props.fake) {
             if (this.isFullScreen()) {
                 if (document.exitFullscreen) document.exitFullscreen();
                 else if (document.mozCancelFullScreen) document.mozCancelFullScreen();

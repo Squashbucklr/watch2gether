@@ -28,7 +28,8 @@ class App extends React.Component {
             hasmpv: false,
             elevated: false,
             sapped: false,
-            genStamp: false
+            genStamp: false,
+            fakeVideo: false
         }
     }
 
@@ -138,13 +139,14 @@ class App extends React.Component {
     render() {
         if (this.state.connected) {
             return (
-                <div className="App">
+                <div className={"App" + (this.state.fakeVideo ? " fake-video" : "")}>
                     <div className="App-left">
                         <Video
                             url={this.state.video_url}
                             play={this.state.video_play}
                             time={this.state.video_time}
                             genStamp={this.state.genStamp}
+                            fake={this.state.fakeVideo}
                             playPause={this.playPause}
                             fakePause={this.fakePause}
                             seek={this.seek}
