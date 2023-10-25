@@ -126,8 +126,6 @@ class App extends React.Component {
         this.setState({genStamp: null});
     }
 
-
-
     userClick = (connectionid) => {
         if (this.state.connections[connectionid].mpv) {
             wsMan.setMpvControl(connectionid);
@@ -136,36 +134,57 @@ class App extends React.Component {
         }
     }
 
+    toggleFakeVideo = () => {
+        console.log('toggle');
+        this.setState({fakeVideo: !this.state.fakeVideo});
+    }
+
     render() {
         if (this.state.connected) {
+            let player = (
+                <Video
+                    url={this.state.video_url}
+                    play={this.state.video_play}
+                    time={this.state.video_time}
+                    genStamp={this.state.genStamp}
+                    fake={this.state.fakeVideo}
+                    playPause={this.playPause}
+                    fakePause={this.fakePause}
+                    seek={this.seek}
+                    sendStampStamp={this.sendStampStamp}
+                />
+            );
+
+            let appLeft = null;
+            let fakePlayer = null;
+            if (this.state.fakeVideo) {
+                fakePlayer = player; 
+            } else {
+                appLeft = (
+                    <div className="App-left">
+                        {player}
+                    </div>
+                );
+            }
+
             return (
                 <div className={"App" + (this.state.fakeVideo ? " fake-video" : "")}>
-                    <div className="App-left">
-                        <Video
-                            url={this.state.video_url}
-                            play={this.state.video_play}
-                            time={this.state.video_time}
-                            genStamp={this.state.genStamp}
-                            fake={this.state.fakeVideo}
-                            playPause={this.playPause}
-                            fakePause={this.fakePause}
-                            seek={this.seek}
-                            sendStampStamp={this.sendStampStamp}
-                        />
-                    </div>
+                    {appLeft}    
                     <div className="App-right">
                         <Controls
-                            setUsername={wsMan.setUsername}
-                            elevate={this.elevate}
-                            sap={this.sap}
-                            mpv={this.mpv}
-                            setUrl={wsMan.setUrl}
                             lobby_id={this.state.lobby_id}
                             video_url={this.state.video_url}
                             host={this.state.host}
                             hasmpv={this.state.hasmpv}
                             elevated={this.state.elevated}
                             sapped={this.state.sapped}
+                            fakeVideo={this.state.fakeVideo}
+                            setUsername={wsMan.setUsername}
+                            elevate={this.elevate}
+                            sap={this.sap}
+                            mpv={this.mpv}
+                            setUrl={wsMan.setUrl}
+                            toggleFakeVideo={this.toggleFakeVideo}
                         />
                         <UserList
                             connections={this.state.connections}
@@ -173,6 +192,7 @@ class App extends React.Component {
                             connectionid={this.state.connectionid}
                             userClick={this.userClick}
                         />
+                        {fakePlayer}
                         <Chat
                             chats={this.state.chats}
                             sendChat={wsMan.sendChat}

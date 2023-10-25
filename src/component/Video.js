@@ -334,133 +334,141 @@ class Video extends React.Component {
     }
 
     render = () => {
-        return (
-            <div className="Video">
-                
-                <figure
-                    ref={this.videoWrapper}
-                    onMouseMove={this.mouseHide(1500)}
-                    onMouseOut={this.mouseHide(0)}
-                    style={{
-                        cursor: this.state.hideMouse ? "none" : "default"
-                    }}
-                    className={"Video-wrapper" + (this.state.hideMouse ? " Video-hide" : "")}
-                >
-                    <video
-                        ref={this.videoNode}
-                        className="Video-video"
-                        onTimeUpdate={() => {
-                            this.setState({
-                                video_currentTimeStamp: this.getTime(this.getCurrentTime()),
-                                video_currentTimeFrac: this.getCurrentTime() / this.getDuration()
-                            })
+        if (this.props.fake) {
+            return (
+                <div className="FakeVideo">
+                    fake!
+                </div>
+            );
+        } else {
+            return (
+                <div className="Video">
+                    
+                    <figure
+                        ref={this.videoWrapper}
+                        onMouseMove={this.mouseHide(1500)}
+                        onMouseOut={this.mouseHide(0)}
+                        style={{
+                            cursor: this.state.hideMouse ? "none" : "default"
                         }}
-                        onDurationChange={() => {this.setState({video_duration: this.getDuration()})}}
+                        className={"Video-wrapper" + (this.state.hideMouse ? " Video-hide" : "")}
                     >
-                        <source src={this.props.url}></source>
-                    </video>
-                    <div
-                        className="Video-overlay"
-                    >
-                        <div
-                            className="Video-play"
-                            onMouseOver={() => {this.handleVideoOverlayHover(1, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(1, false)}}
-                            onClick={() => {this.props.playPause(this.getCurrentTime(), this.getDuration())}}
-                        ><FontAwesomeIcon icon={this.props.play ? faPause : faPlay} /></div>
-                        <div
-                            className="Video-skip-left"
-                            onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
-                            onClick={this.fakeSkipLeft}
-                        ><FontAwesomeIcon icon={faAnglesLeft} /></div>
-                        <div
-                            className="Video-skip-right"
-                            onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
-                            onClick={this.fakeSkipRight}
-                        ><FontAwesomeIcon icon={faAnglesRight} /></div>
-                        <div
-                            className="Video-audio"
-                            onMouseOver={() => {this.handleVideoOverlayHover(2, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(2, false)}}
-                            onClick={this.handleMute}
+                        <video
+                            ref={this.videoNode}
+                            className="Video-video"
+                            onTimeUpdate={() => {
+                                this.setState({
+                                    video_currentTimeStamp: this.getTime(this.getCurrentTime()),
+                                    video_currentTimeFrac: this.getCurrentTime() / this.getDuration()
+                                })
+                            }}
+                            onDurationChange={() => {this.setState({video_duration: this.getDuration()})}}
                         >
-                            <FontAwesomeIcon className="Video-hide-icon" icon={
-                            this.state.video_audio_level > 0.5 ? faVolumeUp :
-                                this.state.video_audio_level === 0 ? faVolumeMute : faVolumeDown} />
+                            <source src={this.props.url}></source>
+                        </video>
+                        <div
+                            className="Video-overlay"
+                        >
                             <div
-                                ref={this.videoAudioScrubber}
-                                className="Video-audio-scrubber"
-                                onMouseMove={this.scrubberAudioPeek}
+                                className="Video-play"
+                                onMouseOver={() => {this.handleVideoOverlayHover(1, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(1, false)}}
+                                onClick={() => {this.props.playPause(this.getCurrentTime(), this.getDuration())}}
+                            ><FontAwesomeIcon icon={this.props.play ? faPause : faPlay} /></div>
+                            <div
+                                className="Video-skip-left"
+                                onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
+                                onClick={this.fakeSkipLeft}
+                            ><FontAwesomeIcon icon={faAnglesLeft} /></div>
+                            <div
+                                className="Video-skip-right"
+                                onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
+                                onClick={this.fakeSkipRight}
+                            ><FontAwesomeIcon icon={faAnglesRight} /></div>
+                            <div
+                                className="Video-audio"
+                                onMouseOver={() => {this.handleVideoOverlayHover(2, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(2, false)}}
+                                onClick={this.handleMute}
+                            >
+                                <FontAwesomeIcon className="Video-hide-icon" icon={
+                                this.state.video_audio_level > 0.5 ? faVolumeUp :
+                                    this.state.video_audio_level === 0 ? faVolumeMute : faVolumeDown} />
+                                <div
+                                    ref={this.videoAudioScrubber}
+                                    className="Video-audio-scrubber"
+                                    onMouseMove={this.scrubberAudioPeek}
+                                    onMouseLeave={() => {
+                                        this.doSeekAudio();
+                                    }}
+                                    onMouseDown={() => {
+                                        this.setState({seekingAudio: true});
+                                    }}
+                                    onMouseUp={() => {
+                                        this.doSeekAudio();
+                                    }}
+                                >
+                                    <div className="Video-audio-scrubber-bg"></div>
+                                    <div
+                                        className="Video-audio-scrubber-bar"
+                                        style={{
+                                            height: (this.state.video_audio_level * 100) + '%'
+                                        }}
+                                    ></div>
+                                </div>
+                            </div>
+                            <div
+                                className="Video-fullscreen"
+                                onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
+                                onClick={this.handleFullscreen}
+                            ><FontAwesomeIcon icon={this.isFullScreen() ? faCompress : faExpand} /></div>
+                            <div
+                                className="Video-time-through"
+                                onMouseOver={() => {this.handleVideoOverlayHover(4, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(4, false)}}
+                            >{this.state.video_currentTimeStamp}</div>
+                            <div
+                                className="Video-time-total"
+                                onMouseOver={() => {this.handleVideoOverlayHover(5, true)}}
+                                onMouseOut={() => {this.handleVideoOverlayHover(5, false)}}
+                            >{this.getTime(this.state.video_duration)}</div>
+                            <div
+                                ref={this.videoScrubber}
+                                className="Video-scrubber"
+                                onMouseMove={this.scrubberPeek}
+                                onMouseEnter={() => {this.handleVideoOverlayHover(0, true)}}
                                 onMouseLeave={() => {
-                                    this.doSeekAudio();
+                                    this.handleVideoOverlayHover(0, false);
+                                    this.doSeek();
                                 }}
                                 onMouseDown={() => {
-                                    this.setState({seekingAudio: true});
+                                    this.setState({seeking: true});
                                 }}
                                 onMouseUp={() => {
-                                    this.doSeekAudio();
+                                    this.doSeek();
                                 }}
                             >
-                                <div className="Video-audio-scrubber-bg"></div>
+                                <div className="Video-scrubber-bg"></div>
                                 <div
-                                    className="Video-audio-scrubber-bar"
+                                    className="Video-scrubber-bar"
                                     style={{
-                                        height: (this.state.video_audio_level * 100) + '%'
+                                        width: (this.state.video_currentTimeFrac * 100) + '%'
                                     }}
                                 ></div>
+                                <div className="Video-scrubber-time"
+                                    style={{
+                                        left: this.state.peek.left
+                                    }}
+                                >{this.getTime(this.state.peek.time)}</div>
                             </div>
                         </div>
-                        <div
-                            className="Video-fullscreen"
-                            onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
-                            onClick={this.handleFullscreen}
-                        ><FontAwesomeIcon icon={this.isFullScreen() ? faCompress : faExpand} /></div>
-                        <div
-                            className="Video-time-through"
-                            onMouseOver={() => {this.handleVideoOverlayHover(4, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(4, false)}}
-                        >{this.state.video_currentTimeStamp}</div>
-                        <div
-                            className="Video-time-total"
-                            onMouseOver={() => {this.handleVideoOverlayHover(5, true)}}
-                            onMouseOut={() => {this.handleVideoOverlayHover(5, false)}}
-                        >{this.getTime(this.state.video_duration)}</div>
-                        <div
-                            ref={this.videoScrubber}
-                            className="Video-scrubber"
-                            onMouseMove={this.scrubberPeek}
-                            onMouseEnter={() => {this.handleVideoOverlayHover(0, true)}}
-                            onMouseLeave={() => {
-                                this.handleVideoOverlayHover(0, false);
-                                this.doSeek();
-                            }}
-                            onMouseDown={() => {
-                                this.setState({seeking: true});
-                            }}
-                            onMouseUp={() => {
-                                this.doSeek();
-                            }}
-                        >
-                            <div className="Video-scrubber-bg"></div>
-                            <div
-                                className="Video-scrubber-bar"
-                                style={{
-                                    width: (this.state.video_currentTimeFrac * 100) + '%'
-                                }}
-                            ></div>
-                            <div className="Video-scrubber-time"
-                                style={{
-                                    left: this.state.peek.left
-                                }}
-                            >{this.getTime(this.state.peek.time)}</div>
-                        </div>
-                    </div>
-                </figure>
-            </div>
-        );
+                    </figure>
+                </div>
+            );
+        }
     }
 }
 
