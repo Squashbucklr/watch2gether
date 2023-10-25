@@ -30,8 +30,14 @@ class Controls extends React.Component {
     }
 
     elevate = () => {
-        let username = this.elevateInput.current.value;
-        this.props.elevate(username);
+        let key = this.elevateInput.current.value;
+        this.props.elevate(key);
+        this.elevateInput.current.value = "";
+    }
+
+    sap = () => {
+        let key = this.elevateInput.current.value;
+        this.props.sap(key);
         this.elevateInput.current.value = "";
     }
 
@@ -67,11 +73,12 @@ class Controls extends React.Component {
                 <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                     <input type="password" onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
                     <button className={this.props.elevated ? "Controls-green" : ""} onClick={this.elevate}>Elevate</button>
+                    <button className={this.props.sapped ? "Controls-green" : ""} onClick={this.sap}>Sap</button>
                 </div>
                 <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
                     <button onClick={this.mpv('display')}>Display</button>
-                    <button onClick={this.mpv('subcycle')}>S cycle</button>
-                    <button onClick={this.mpv('audiocycle')}>A cycle</button>
+                    <button onClick={this.mpv('subcycle')}>Subs</button>
+                    <button onClick={this.mpv('audiocycle')}>Audio</button>
                     <button onClick={this.mpv('voldown')}>Vol -</button>
                     <button onClick={this.mpv('volup')}>Vol +</button>
                 </div>

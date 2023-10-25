@@ -10,10 +10,12 @@ import {
     faVolumeUp,
     faVolumeDown,
     faExpand,
-    faCompress
+    faCompress,
+    faAnglesRight,
+    faAnglesLeft
 } from '@fortawesome/free-solid-svg-icons'
 
-const OFFSET_TOLERANCE = 0.25;
+const OFFSET_TOLERANCE = 0.05;
 
 class Video extends React.Component {
     constructor(props) {
@@ -57,12 +59,12 @@ class Video extends React.Component {
                     case 'ArrowRight':
                     case 'KeyL':
                         if (e.shiftKey) this.props.seek(this.getCurrentTime() + 85, this.getPause());
-                        else this.props.seek(this.getCurrentTime() + 5, this.getPause());
+                        else this.props.seek(Math.min(this.getCurrentTime() + 5, this.getDuration()), this.getPause());
                         break;
                     case 'ArrowLeft':
                     case 'KeyJ':
                         if (e.shiftKey) this.props.seek(this.getCurrentTime() - 85, this.getPause());
-                        else this.props.seek(this.getCurrentTime() - 5, this.getPause());
+                        else this.props.seek(Math.max(this.getCurrentTime() - 5, 0), this.getPause());
                         break;
                     case 'KeyF':
                         this.handleFullscreen();
@@ -75,13 +77,12 @@ class Video extends React.Component {
         this.needsAudioChange = Math.abs(this.state.video_audio_level - nextState.video_audio_level) > 0.001;
         this.needsSourceLoad = this.props.url !== nextProps.url;
         this.needsPlayChange = this.props.play !== nextProps.play;
-        this.needsTimeChange = Math.abs(this.props.time - nextProps.time) > 0.01;
+        this.needsTimeChange = Math.abs(this.props.time - nextProps.time) > 0.001;
         return true;
     }
 
     componentDidUpdate = () => {
         if (this.needsSourceLoad) this.videoNode.current.load();
-        if (this.needsTimeChange) this.fixVideoPosition();
         if (this.needsAudioChange) this.fixAudioValue();
         if (this.needsPlayChange) {
             if (this.videoNode.current.paused && this.props.play &&
@@ -91,14 +92,19 @@ class Video extends React.Component {
                 this.videoNode.current.pause();
             }
         }
+        if (this.needsTimeChange) this.fixVideoPosition();
         if (this.getCurrentTime() === this.getDuration() && this.props.play) {
             this.props.fakePause();
+        }
+        if (this.props.genStamp != null) {
+            this.props.sendStampStamp(this.props.genStamp, this.getCurrentTime());
         }
     }
 
     fixVideoPosition = () => {
+        console.log(this.props.play);
         this.needsScrub = false;
-        if (this.props.play || Math.abs(this.getCurrentTime() - this.props.time) > OFFSET_TOLERANCE) {
+        if (!this.props.play || Math.abs(this.getCurrentTime() - this.props.time) > OFFSET_TOLERANCE) {
             // important to note that this.props.time only changes when the websocket passes the video state.
             // it does not live update.
             this.videoNode.current.currentTime = this.props.time;
@@ -235,6 +241,16 @@ class Video extends React.Component {
         }
     }
 
+    fakeSkipRight = () => {
+        let newtime = Math.min(this.getCurrentTime() + 1, this.getDuration());
+        this.videoNode.current.currentTime = newtime;
+    }
+
+    fakeSkipLeft = () => {
+        let newtime = Math.max(this.getCurrentTime() - 0.2, 0);
+        this.videoNode.current.currentTime = newtime;
+    }
+
     handleVideoOverlayHover = (zone, hover) => {
         let newVideoOverlayHovers = [...this.state.videoOverlayHovers];
         newVideoOverlayHovers[zone] = hover;
@@ -287,6 +303,18 @@ class Video extends React.Component {
                             onMouseOut={() => {this.handleVideoOverlayHover(1, false)}}
                             onClick={() => {this.props.playPause(this.getCurrentTime(), this.getDuration())}}
                         ><FontAwesomeIcon icon={this.props.play ? faPause : faPlay} /></div>
+                        <div
+                            className="Video-skip-left"
+                            onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
+                            onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
+                            onClick={this.fakeSkipLeft}
+                        ><FontAwesomeIcon icon={faAnglesLeft} /></div>
+                        <div
+                            className="Video-skip-right"
+                            onMouseOver={() => {this.handleVideoOverlayHover(3, true)}}
+                            onMouseOut={() => {this.handleVideoOverlayHover(3, false)}}
+                            onClick={this.fakeSkipRight}
+                        ><FontAwesomeIcon icon={faAnglesRight} /></div>
                         <div
                             className="Video-audio"
                             onMouseOver={() => {this.handleVideoOverlayHover(2, true)}}

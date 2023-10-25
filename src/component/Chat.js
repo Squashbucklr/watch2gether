@@ -6,6 +6,7 @@ class Chat extends React.Component {
     constructor(props) {
         super(props);
         this.chatInput = React.createRef();
+        this.chatBox = React.createRef();
         this.state = {
             
         }
@@ -15,6 +16,18 @@ class Chat extends React.Component {
         let message = this.chatInput.current.value;
         this.props.sendChat(message);
         this.chatInput.current.value = "";
+    }
+
+    componentDidUpdate = (prevProps) => {
+        if (prevProps.chats.length < this.props.chats.length) {
+            this.chatBox.current.scrollTop =
+                this.chatBox.current.scrollHeight -
+                this.chatBox.current.clientHeight;
+        }
+    }
+
+    sendStamp = (type) => () => {
+        this.props.sendStamp(type);
     }
 
     enterKey = (fun) => {
@@ -39,8 +52,13 @@ class Chat extends React.Component {
 
         return (
             <div className="Chat">
-                <div className="Chat-box">
+                <div className="Chat-box" ref={this.chatBox}>
                     {chats}
+                </div>
+                <div className="Chat-stamp">
+                    <button onClick={this.sendStamp('text')}>Text</button>
+                    <button onClick={this.sendStamp('signs')}>Signs</button>
+                    <button onClick={this.sendStamp('timing')}>Timing</button>
                 </div>
                 <div className="Chat-bar">
                     <input onKeyDown={this.enterKey(this.sendChat)} ref={this.chatInput}></input>

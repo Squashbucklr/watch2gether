@@ -9,6 +9,7 @@ let onConnections = () => {};
 let onChat = () => {};
 let onVideo = () => {};
 let onElevated = () => {};
+let onSap = () => {};
 
 const wsMan = {
     onConnect: (fun) => {onConnect = fun},
@@ -17,13 +18,16 @@ const wsMan = {
     onChat: (fun) => {onChat = fun},
     onVideo: (fun) => {onVideo = fun},
     onElevated: (fun) => {onElevated = fun},
+    onSap: (fun) => {onSap = fun},
     disconnect: () => {
         if(ws) ws.close();
         else onDisconnect();
     },
-    init: (lobby_id) => {
+    init: (lobby_id, sap) => {
         console.log('Initializing WebSocket connection...');
-        ws = new WebSocket('wss://' + config.base + '/lobby?id=' + lobby_id);
+        let url = 'wss://' + config.base + '/lobby?id=' + lobby_id;
+        if (sap) url += '&sap=' + sap;
+        ws = new WebSocket(url);
         ws.onopen = () => {
             onConnect();
             pingLoop();
@@ -51,6 +55,9 @@ const wsMan = {
                 case 'elevated':
                     onElevated(data.elevated);
                     break;
+                case 'sap':
+                    onSap(data.sapped);
+                    break;
                 default:
                     console.log(data);
                     break;
@@ -74,10 +81,17 @@ const wsMan = {
             time
         }));
     },
-    elevate: (code) => {
+    elevate: (key) => {
         if(ws && ws.readyState === 1) ws.send(JSON.stringify({
             type: 'elevate',
-            code
+            key
+        }));
+    },
+    sap: () => {
+        let params = new URLSearchParams(window.location.search);
+        if(ws && ws.readyState === 1) ws.send(JSON.stringify({
+            type: 'sap',
+            key: params.get('sap')
         }));
     },
     mpv: (command) => {
