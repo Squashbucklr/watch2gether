@@ -137,6 +137,13 @@ class App extends React.Component {
 
     toggleFakeVideo = () => {
         console.log('toggle');
+        let params = new URLSearchParams(window.location.search);
+        if (!this.state.fakeVideo) { // setting to true
+            params.set('fake', 'true');
+        } else {
+            params.delete('fake');
+        }
+        window.history.replaceState({}, "", window.location.pathname + '?' + params.toString());
         this.setState({fakeVideo: !this.state.fakeVideo});
     }
 

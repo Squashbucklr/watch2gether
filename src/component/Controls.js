@@ -15,7 +15,9 @@ class Controls extends React.Component {
     }
 
     shouldComponentUpdate = (nextProps, nextState) => {
-        this.needsUrlChange = this.props.video_url !== nextProps.video_url;
+        this.needsUrlChange =
+            this.props.video_url !== nextProps.video_url ||
+            this.props.host !== nextProps.host;
         return true;
     }
 

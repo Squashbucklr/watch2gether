@@ -335,6 +335,10 @@ class Video extends React.Component {
         this.props.seek(this.getCurrentTime() - 5);
     }
 
+    toStart = () => {
+        this.props.seek(0);
+    }
+
     fakeSkipRight = () => {
         let newtime = Math.min(this.getCurrentTime() + 1, this.getDuration());
         this.setCurrentTime(newtime)
@@ -370,6 +374,9 @@ class Video extends React.Component {
                         <FontAwesomeIcon icon={this.props.play ? faPause : faPlay} />
                     </button>
                     <div>{this.state.video_currentTimeStamp}</div>
+                    <button onClick={this.toStart}>
+                        <FontAwesomeIcon icon={faAnglesLeft} />
+                    </button>
                     <button onClick={this.skipLeft}>
                         <FontAwesomeIcon icon={faAnglesLeft} />
                     </button>
