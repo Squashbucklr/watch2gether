@@ -1,5 +1,3 @@
-import config from '../config.json';
-
 let ws = null;
 let pingpongtimeout = null;
 
@@ -25,8 +23,19 @@ const wsMan = {
     },
     init: (lobby_id, sap) => {
         console.log('Initializing WebSocket connection...');
-        let url = 'wss://' + config.base + '/lobby?id=' + lobby_id;
+
+        let wsurl = 'ws://';
+        // let wsport = '80';
+        if (window.location.protocol == 'https:') {
+            wsurl = 'wss://';
+            // wsport = '443';
+        }
+        wsurl += window.location.host;
+        
+        let url = wsurl + '/lobby?id=' + lobby_id;
         if (sap) url += '&sap=' + sap;
+        console.log(url);
+
         ws = new WebSocket(url);
         ws.onopen = () => {
             onConnect();
