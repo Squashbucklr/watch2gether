@@ -29,6 +29,7 @@ class App extends React.Component {
             elevated: false,
             sapped: false,
             genStamp: false,
+            hideChat: false,
             fakeVideo: params.get('fake') == 'true'
         }
     }
@@ -147,6 +148,13 @@ class App extends React.Component {
         this.setState({fakeVideo: !this.state.fakeVideo});
     }
 
+    toggleHideChat = () => {
+        console.log('toggle chat');
+        this.setState({
+            hideChat: !this.state.hideChat
+        });
+    }
+
     render() {
         if (this.state.connected) {
             let player = (
@@ -164,6 +172,8 @@ class App extends React.Component {
             );
 
             let appLeft = null;
+            let appHide = null;
+            let appRight = null;
             let fakePlayer = null;
             if (this.state.fakeVideo) {
                 fakePlayer = player; 
@@ -175,9 +185,16 @@ class App extends React.Component {
                 );
             }
 
-            return (
-                <div className={"App" + (this.state.fakeVideo ? " fake-video" : "")}>
-                    {appLeft}    
+            appHide = (
+                <div className="App-hidden">
+                    <button className="hide-button" onClick={this.toggleHideChat}>
+                        {this.state.hideChat ? "\u21A2" : "\u21A3"}
+                    </button>
+                </div>
+            )
+
+            if(!this.state.hideChat){
+                appRight = (
                     <div className="App-right">
                         <Controls
                             lobby_id={this.state.lobby_id}
@@ -207,6 +224,13 @@ class App extends React.Component {
                             sendStamp={this.sendStamp}
                         />
                     </div>
+                );
+            }
+            return (
+                <div className={"App" + (this.state.fakeVideo ? " fake-video" : "")}>
+                    {appLeft}  
+                    {appHide}  
+                    {appRight}  
                 </div>
             );
         } else {
