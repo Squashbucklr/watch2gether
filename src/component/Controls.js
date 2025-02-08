@@ -63,43 +63,58 @@ class Controls extends React.Component {
     }
 
     render() {
-        return (
-            <div className="Controls">
-                <div className="Controls-control">
-                    <div>lobby: {this.props.lobby_id}</div>
+        let hideButton = <button className="Controls-hideButton" onClick={this.props.toggleHideSidebar}>
+            {this.props.hideSidebar ? "\u21A2" : "\u21A3"}
+        </button>;
+
+        if (this.props.hideSidebar) {
+            return (
+                <div className="Controls">
+                    <div className="Controls-control Controls-justbutton">
+                        {hideButton}
+                    </div>
                 </div>
-                <div className="Controls-control">
-                    <input onKeyDown={this.enterKey(this.setUsername)} ref={this.usernameInput}></input>
-                    <button onClick={this.setUsername}>Uname</button>
-                    <button onClick={this.props.toggleFakeVideo}>{this.props.fakeVideo ? "Fake" : "Video"}</button>
+            );
+        } else {
+            return (
+                <div className="Controls">
+                    <div className="Controls-control">
+                        {hideButton}
+                        <div>lobby: {this.props.lobby_id}</div>
+                    </div>
+                    <div className="Controls-control">
+                        <input onKeyDown={this.enterKey(this.setUsername)} ref={this.usernameInput}></input>
+                        <button onClick={this.setUsername}>Uname</button>
+                        <button onClick={this.props.toggleFakeVideo}>{this.props.fakeVideo ? "Fake" : "Video"}</button>
+                    </div>
+                    <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
+                        <input type="password" onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
+                        <button className={this.props.elevated ? "Controls-green" : ""} onClick={this.elevate}>Elevate</button>
+                        <button className={this.props.sapped ? "Controls-green" : ""} onClick={this.sap}>Sap</button>
+                    </div>
+                    <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
+                        <button onClick={this.mpv('display')}>Display</button>
+                        <button onClick={this.mpv('subcycle')}>Subs</button>
+                        <button onClick={this.mpv('audiocycle')}>Audio</button>
+                        <button onClick={this.mpv('voldown')}>Vol -</button>
+                        <button onClick={this.mpv('volup')}>Vol +</button>
+                    </div>
+                    <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
+                        <button onClick={this.mpv('subdelaydown')}>SD -</button>
+                        <button onClick={this.mpv('subdelayup')}>SD +</button>
+                        <button onClick={this.mpv('audiodelaydown')}>AD -</button>
+                        <button onClick={this.mpv('audiodelayup')}>AD +</button>
+                    </div>
+                    <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
+                        <textarea
+                            onKeyDown={this.enterKey(this.setUrl)}
+                            ref={this.urlInput}
+                        ></textarea>
+                        <button onClick={this.setUrl}>Url</button>
+                    </div>
                 </div>
-                <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
-                    <input type="password" onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>
-                    <button className={this.props.elevated ? "Controls-green" : ""} onClick={this.elevate}>Elevate</button>
-                    <button className={this.props.sapped ? "Controls-green" : ""} onClick={this.sap}>Sap</button>
-                </div>
-                <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
-                    <button onClick={this.mpv('display')}>Display</button>
-                    <button onClick={this.mpv('subcycle')}>Subs</button>
-                    <button onClick={this.mpv('audiocycle')}>Audio</button>
-                    <button onClick={this.mpv('voldown')}>Vol -</button>
-                    <button onClick={this.mpv('volup')}>Vol +</button>
-                </div>
-                <div className={"Controls-control Controls-buttons" + (!this.props.host || !this.props.hasmpv ? " Controls-control-hide" : "")}>
-                    <button onClick={this.mpv('subdelaydown')}>SD -</button>
-                    <button onClick={this.mpv('subdelayup')}>SD +</button>
-                    <button onClick={this.mpv('audiodelaydown')}>AD -</button>
-                    <button onClick={this.mpv('audiodelayup')}>AD +</button>
-                </div>
-                <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
-                    <textarea
-                        onKeyDown={this.enterKey(this.setUrl)}
-                        ref={this.urlInput}
-                    ></textarea>
-                    <button onClick={this.setUrl}>Url</button>
-                </div>
-            </div>
-        );
+            );
+        }
     }
 }
 

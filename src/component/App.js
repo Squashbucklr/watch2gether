@@ -29,7 +29,7 @@ class App extends React.Component {
             elevated: false,
             sapped: false,
             genStamp: false,
-            hideChat: false,
+            hideSidebar: false,
             fakeVideo: params.get('fake') == 'true'
         }
     }
@@ -148,10 +148,9 @@ class App extends React.Component {
         this.setState({fakeVideo: !this.state.fakeVideo});
     }
 
-    toggleHideChat = () => {
-        console.log('toggle chat');
+    toggleHideSidebar = () => {
         this.setState({
-            hideChat: !this.state.hideChat
+            hideSidebar: !this.state.hideSidebar
         });
     }
 
@@ -188,29 +187,33 @@ class App extends React.Component {
             appHide = (
                 <div className="App-hidden">
                     <button className="hide-button" onClick={this.toggleHideChat}>
-                        {this.state.hideChat ? "\u21A2" : "\u21A3"}
+                        {this.state.hideSidebar ? "\u21A2" : "\u21A3"}
                     </button>
                 </div>
             )
 
-            if(!this.state.hideChat){
+            let controls = <Controls
+                lobby_id={this.state.lobby_id}
+                video_url={this.state.video_url}
+                host={this.state.host}
+                hasmpv={this.state.hasmpv}
+                elevated={this.state.elevated}
+                sapped={this.state.sapped}
+                fakeVideo={this.state.fakeVideo}
+                hideSidebar={this.state.hideSidebar}
+                setUsername={wsMan.setUsername}
+                elevate={this.elevate}
+                sap={this.sap}
+                mpv={this.mpv}
+                setUrl={wsMan.setUrl}
+                toggleFakeVideo={this.toggleFakeVideo}
+                toggleHideSidebar={this.toggleHideSidebar}
+            />;
+
+            if(!this.state.hideSidebar){
                 appRight = (
                     <div className="App-right">
-                        <Controls
-                            lobby_id={this.state.lobby_id}
-                            video_url={this.state.video_url}
-                            host={this.state.host}
-                            hasmpv={this.state.hasmpv}
-                            elevated={this.state.elevated}
-                            sapped={this.state.sapped}
-                            fakeVideo={this.state.fakeVideo}
-                            setUsername={wsMan.setUsername}
-                            elevate={this.elevate}
-                            sap={this.sap}
-                            mpv={this.mpv}
-                            setUrl={wsMan.setUrl}
-                            toggleFakeVideo={this.toggleFakeVideo}
-                        />
+                        {controls}
                         <UserList
                             connections={this.state.connections}
                             host={this.state.host}
@@ -225,11 +228,18 @@ class App extends React.Component {
                         />
                     </div>
                 );
+            } else {
+                appRight = (
+                    <div className="App-right App-right-hide">
+                        {controls}
+                    </div>
+                );
             }
+
+
             return (
                 <div className={"App" + (this.state.fakeVideo ? " fake-video" : "")}>
                     {appLeft}  
-                    {appHide}  
                     {appRight}  
                 </div>
             );

@@ -11,8 +11,16 @@
         display: flex;
         gap: 15px;
 
+        &.Controls-justbutton button {
+          line-height: 25px;
+        }
+
         &.Controls-control-hide {
             display: none;
+        }
+
+        & .Controls-hideButton {
+          width: 25px;
         }
 
         & div {

@@ -13,6 +13,10 @@
         flex: 0 0 350px;
         display: flex;
         flex-direction: column;
+
+        &.App-right-hide {
+          flex: 0 0 auto;
+        }
     }
 
     & .App-hidden {
