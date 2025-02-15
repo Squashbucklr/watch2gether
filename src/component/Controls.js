@@ -63,9 +63,16 @@ class Controls extends React.Component {
     }
 
     render() {
+        let mpvW2gButton = null;
         let hideButton = <button className="Controls-hideButton" onClick={this.props.toggleHideSidebar}>
             {this.props.hideSidebar ? "\u21A2" : "\u21A3"}
         </button>;
+
+        if (this.props.launchMpvW2g) {
+            mpvW2gButton = (
+                <button onClick={() => this.props.launchMpvW2g("mpv-w2g user")}>mpv</button>
+            );
+        }
 
         if (this.props.hideSidebar) {
             return (
@@ -86,6 +93,7 @@ class Controls extends React.Component {
                         <input onKeyDown={this.enterKey(this.setUsername)} ref={this.usernameInput}></input>
                         <button onClick={this.setUsername}>Uname</button>
                         <button onClick={this.props.toggleFakeVideo}>{this.props.fakeVideo ? "Fake" : "Video"}</button>
+                        {mpvW2gButton}
                     </div>
                     <div className={"Controls-control" + (!this.props.host ? " Controls-control-hide" : "")}>
                         <input type="password" onKeyDown={this.enterKey(this.elevate)} ref={this.elevateInput}></input>

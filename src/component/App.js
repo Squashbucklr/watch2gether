@@ -30,7 +30,8 @@ class App extends React.Component {
             sapped: false,
             genStamp: false,
             hideSidebar: false,
-            fakeVideo: params.get('fake') == 'true'
+            fakeVideo: params.get('fake') == 'true',
+            launchMpvW2g: null
         }
     }
 
@@ -81,6 +82,11 @@ class App extends React.Component {
         });
 
         wsMan.init(this.state.lobby_id, this.state.start_sap);
+
+        if (window.launch_mpv_w2g) {
+            console.log('launch_mpv_w2g userscript detected!');
+            this.setState({launchMpvW2g: window.launch_mpv_w2g});
+        }
     }
 
     playPause = (time, duration) => {
@@ -208,6 +214,7 @@ class App extends React.Component {
                 setUrl={wsMan.setUrl}
                 toggleFakeVideo={this.toggleFakeVideo}
                 toggleHideSidebar={this.toggleHideSidebar}
+                launchMpvW2g={this.state.launchMpvW2g}
             />;
 
             if(!this.state.hideSidebar){
