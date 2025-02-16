@@ -22,7 +22,9 @@ class Controls extends React.Component {
     }
 
     componentDidUpdate = () => {
-        if (this.needsUrlChange) this.urlInput.current.value = this.props.video_url;
+        if (this.needsUrlChange && (this.urlInput && this.urlInput.current)) {
+            this.urlInput.current.value = this.props.video_url;
+        }
     }
 
     setUsername = () => {
